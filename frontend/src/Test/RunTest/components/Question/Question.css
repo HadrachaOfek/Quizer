@@ -1,0 +1,16 @@
+.chosen {
+    background-color: #5A96D6;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+}
+
+.circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px #A1C4E7 solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

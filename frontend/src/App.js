@@ -1,22 +1,18 @@
-import logo from './logo.svg';
 import './App.css';
+import EnterPage from './Test/EnterPage/EnterPage';
+import RunTest from './Test/RunTest/RunTest';
+
 
 function App() {
   return (
     <div className="App">
+
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+
+
+        {/* <EnterPage></EnterPage> */}
+<RunTest></RunTest>
+
       </header>
     </div>
   );
