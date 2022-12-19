@@ -1,18 +1,18 @@
-import pkg from 'mongoose'
+import pkg from 'mongoose';
 
 const { Schema } = pkg;
 
 const TestSchema = new Schema({
-  Admin : {type : Array , require : true},
-  Password : {type : String },
-  Title : {type : String , require : true},
-  Insturctions : {type : String , require : true},
-  Logo : {type : String},
-  Duration : {type : Number},
-  Active : {type : Boolean , default : false},
-  NumOfQuestions : {type : Number , require : true},
-  QuestionsBank : {type : Array , default : []},
-  Users : {type : Array , default : []}
+	admin: { type: Array, require: true },
+	password: { type: String },
+	title: { type: String, require: true },
+	insturctions: { type: String, require: true },
+	logo: { type: String },
+	duration: { type: Number },
+	active: { type: Boolean, default: false },
+	numOfQuestions: { type: Number, require: true },
+	questionsBank: { type: Array, default: [] },
+	users: { type: Array, default: [] },
 });
 
 const Test = pkg.model('Test', TestSchema);
