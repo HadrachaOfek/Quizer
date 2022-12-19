@@ -10,8 +10,21 @@
 import express  from 'express'
 import cors from 'cors';
 import pkg from 'mongoose';
-import Accounts from './Post.js';
-import dbUrl, { PASSWORD, USERNAME } from './ENV.js';
+import Test from './Patterns/Test.js';
+import Question from './Patterns/Question.js';
+import dbUrl, { ADMIN, PASSWORD, USERNAME } from './ENV.js';
+
+const GeneratePasscode = async() => {
+    var passcode = "";
+    for (let i = 0; i < 8; i++) {
+        passcode += String.fromCharCode(65 + Math.floor(Math.random() * 26))
+    }
+    const res = (await Test.findOne({Password : passcode}));
+    if(res == null){
+        return passcode;
+    }
+    GeneratePasscode();
+}
 
 
 const app = express();
@@ -33,30 +46,45 @@ app.listen(PORT, async ()=>{
 
 app.get('/',async (req,res)=>
 {
-    try {
-        const temp = new Accounts({
-            date : null,
-            comments : "dfsfd",
-            title : "hello",
-            author : "oded vaalany",
-            hidden : true,
-        })
-        await temp.save();
-        console.log("hello");
+    try{
+        console.log(await  GeneratePasscode() );
     } catch (error) {
-        console.log(error);   
+        
     }
-    res.send("<h1>hello</h1>");
+    res.send("hello");
 })
 
-app.get("/start-test/:pin/:id",(req,res)=>
+app.post("/test/create/:id",async(req,res)=>
 {
-    console.log(req.params);
-    res.send("lol")
+    if(req.params.id != 0 && req.body.Title != null){
+        const passcode = await GeneratePasscode();
+        const body = {
+            Admin : [req.params.id],
+            Password : passcode,
+            Title : req.body.Title,
+            Insturctions : req.body.Insturctions,
+            Logo : req.body.Logo != null ? req.body.Logo : "",
+            Duration : req.body.Duration,
+            Active : false,
+            NumOfQuestions : req.body.NumOfQuestions,
+            QuestionsBank : req.body.Question,
+            Users : req.body.Users
+        }
+        const record = new Test(body);
+        await record.save();
+        res.send(passcode)
+    }
+    else{
+        res.send("Error one of the items don't match the formats");
+    }
 })
 
-app.get("/exm?",(req,res) =>
+app.patch("/test/active/:id/:testid/:testpassword",async(req,res) =>
 {
+    const record = await Test.findOne({_id :  req.params.testid,Password : req.params.testpassword});
+    if(req.params.id in ADMIN){
+        const record = await Test.findById(req.params.testid);
+    }
     res.send("hello")
 })
 
