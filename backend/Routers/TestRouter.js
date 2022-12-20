@@ -26,6 +26,7 @@ const GeneratePasscode = async () => {
 		logo: String,
 		duration: Int,
 		numOfQuestions: Int,
+		passingGrade : Int,
 		users: [String]
  * }
  * the call will return the test passcode and id in success
@@ -40,6 +41,7 @@ TestRouter.post('/create/:id', async (req, res) => {
 			insturctions: req.body.insturctions,
 			logo: req.body.logo != null ? req.body.logo : '',
 			duration: req.body.duration,
+			passingGrade : req.body.passingGrade,
 			active: false,
 			numOfQuestions: req.body.numOfQuestions,
 			questionsBank: [],

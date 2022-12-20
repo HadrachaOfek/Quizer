@@ -10,6 +10,7 @@ const TestSchema = new Schema({
 	logo: { type: String },
 	duration: { type: Number },
 	active: { type: Boolean, default: false },
+	passingGrade : {type : Number , default : 60},
 	numOfQuestions: { type: Number, require: true },
 	questionsBank: { type: Array, default: [] },
 	users: { type: Array, default: [] },
