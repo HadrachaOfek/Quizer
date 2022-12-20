@@ -35,13 +35,13 @@ TestRouter.post('/create/:id', async (req, res) => {
 	if (req.params.id != 0 && req.body.title != null) {
 		const passcode = await GeneratePasscode();
 		const body = {
-			admin: [req.params.id],
+			admin: [req.admins],
 			password: passcode,
 			title: req.body.title,
 			insturctions: req.body.insturctions,
 			logo: req.body.logo != null ? req.body.logo : '',
 			duration: req.body.duration,
-			passingGrade : req.body.passingGrade,
+			passingGrade: req.body.passingGrade,
 			active: false,
 			numOfQuestions: req.body.numOfQuestions,
 			questionsBank: [],
@@ -49,7 +49,7 @@ TestRouter.post('/create/:id', async (req, res) => {
 		};
 		const record = new Test(body);
 		await record.save();
-		res.send(passcode);
+		res.send(passcode, record._id);
 	} else {
 		res.send("Error one of the items don't match the formats");
 	}
