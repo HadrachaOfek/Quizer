@@ -49,7 +49,7 @@ TestRouter.post('/create/:id', async (req, res) => {
 		};
 		const record = new Test(body);
 		await record.save();
-		res.send(passcode, record._id);
+		res.send(record._id);
 	} else {
 		res.send("Error one of the items don't match the formats");
 	}
@@ -136,7 +136,7 @@ TestRouter.patch('/update_admins/:id/:testid', async (req, res) => {
 	}
 });
 
-TestRouter.get('/', (req, res) => {
-	res.send('hello');
+TestRouter.get('/', async (req, res) => {
+	res.json(await Test.find());
 });
 export default TestRouter;
