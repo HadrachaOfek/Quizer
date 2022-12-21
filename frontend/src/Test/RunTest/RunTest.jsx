@@ -1,21 +1,27 @@
 import Question from "./components/Question/Question";
+import './RunTest.css';
+import ofekLogo from '../resources/images/ofek.png';
+import hadrachaLogo from '../resources/images/hadracha.png';
+import { example1, example2, example3 } from "./QuestionsBank/Questions";
 
-function RunTest() {
+
+function RunTest(props) {
 
     // answers:[{answer, grade}]
     // type, question, answers, totalGrade
 
-    const example = {
-        test: 'דוגמא', type: 0, question: '? נצליח',
-        answers: [{ answer: 'בדוק', grade: 0 },
-        {answer: 'נצליח', grade: 0},
-        {answer: 'אין עלינו', grade: 10},
-        {answer: 'אין אופציה אחרת', grade: 0}],
-        totalGrade: 10
-    }
+    return <div id="run-test" >
+        <div className="run-test-header">
+            <img className='ofek' src={ofekLogo} alt='' />
+            <h1>{props.test}</h1>
+            <img className='hadracha' src={hadrachaLogo} alt='' />
+        </div>
+        <div className="questions-part">
+            <Question {...example1}></Question>
+            <Question {...example2}></Question>
+            <Question {...example3}></Question>
+        </div>
 
-    return <div>
-        <Question {...example}></Question>
     </div>
 }
 

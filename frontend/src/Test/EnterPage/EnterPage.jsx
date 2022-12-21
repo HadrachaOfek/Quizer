@@ -5,6 +5,8 @@ import { TextField, Button } from '@mui/material'
 
 function EnterPage() {
   return (
+    <div className='background'>
+
     <div id='enter-page'>
       <div id='enter-page-header'>
         <img className='ofek' src={ofekLogo} alt='' />
@@ -21,6 +23,8 @@ function EnterPage() {
         <Button variant="contained">Contained</Button>
       </div>
 
+    </div>
+    
     </div>
   )
 }

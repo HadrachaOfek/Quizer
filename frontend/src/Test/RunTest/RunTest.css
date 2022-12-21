@@ -1,0 +1,15 @@
+#run-test{
+    background-color: #E8F3F9;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.run-test-header{
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+}

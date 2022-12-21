@@ -1,13 +1,30 @@
 .chosen {
     background-color: #5A96D6;
-    width: 13px;
-    height: 13px;
+    width: 11px;
+    height: 11px;
     border-radius: 50%;
+
+}
+
+fieldset {
+    margin-bottom: 40px;
+    width: 700px;
+}
+
+#question {
+    direction: rtl;
+    font-size: 15px;
+    color: black;
+}
+
+.answer {
+    display: flex;
+
 }
 
 .circle {
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     border-radius: 50%;
     border: 2px #A1C4E7 solid;
     display: flex;

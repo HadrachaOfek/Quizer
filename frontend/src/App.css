@@ -14,16 +14,16 @@
 }
 
 .App-header {
-  background-color: #282c34;
+    background-color: #E8F3F9;
   background-size: cover;
   height: 609px;
   position: relative;
   width: 1280px;
   z-index: 1000000;
-  overflow: hidden;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  background-image: url(./Test/resources/gifs/background.gif);
+  /* background-image: url(./Test/resources/gifs/background.gif); */
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
