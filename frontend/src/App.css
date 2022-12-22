@@ -2,13 +2,15 @@
 	text-align: center;
 }
 
-* {
-	direction: rtl;
-}
-
 .App-logo {
 	height: 40vmin;
 	pointer-events: none;
+}
+
+body {
+	background-image: url('./assets/background.gif');
+	background-size: 100vw 100vh;
+	background-attachment: fixed;
 }
 
 @media (prefers-reduced-motion: no-preference) {

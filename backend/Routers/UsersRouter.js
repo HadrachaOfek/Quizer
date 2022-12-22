@@ -3,14 +3,52 @@ import { ADMIN } from '../ENV.js';
 import Test from '../Patterns/Test.js';
 import Users from '../Patterns/Users.js';
 
+/**
+ * #######################################################
+ *
+ * 				Users collection doc
+ *
+ * #######################################################
+ *
+ * All the users of this platform have to be registed in the user
+ *  collection, when admin user create a test it can create a new
+ * user in the users collection
+ *
+ * we can get all the user's ids in the user collection
+ * by callign : GET user/ids
+ *
+ * we can get all the user information
+ * by calling : GET user/connect/<user id>/<user password>
+ *
+ * we can set admin premission to a user by another admin user
+ * by calling : PATCH /set_admin/<user id>/<admin id>/<admin password>
+ *
+ * we can link test to a user
+ * by calling : PATCH /add/<user id>/<test id>
+ *
+ * we can add a user to the collection
+ * by calling : POST /create
+ * body :
+ * {
+ * 	firstName : String,
+ * 	lastName : String,
+ * 	userId : String with (7 or 9 digits)
+ * 	linkedList : [String]
+ * 	password : [String]
+ * }
+ *
+ */
+
 const UsersRouter = Router();
 
-UsersRouter.get('/id/:id', async (req, res) => {
-	if (
-		!isNaN(req.params.id) &&
-		(req.params.id.length == 7 || req.params.id.length == 9)
-	) {
-		res.json(await Users.find({ userId: req.params.id }));
+UsersRouter.get('/connect/:userId/:userPassword', async (req, res) => {
+	const { userId, userPassword } = req.params;
+	if (!isNaN(userId) && (userId.length == 7 || userId.length == 9)) {
+		if (await Users.exists({ userId: userId, password: userPassword }))
+			res.json(
+				await Users.findOne({ userId: userId, password: userPassword })
+			);
+		else res.json("User don't found");
 	} else {
 		res.sendStatus(404);
 	}
@@ -27,23 +65,46 @@ UsersRouter.get('/ids', async (req, res) => {
 	res.json(ids);
 });
 
-UsersRouter.patch('/add/:userid/:testid', async (req, res) => {
-	try {
-		if (await Users.exists({ userId: req.params.userid })) {
-			if (
-				(await Users.exists({
-					userId: req.params.userid,
-					linkedTest: req.params.testid,
-				})) == null
-			) {
+UsersRouter.patch(
+	'/set_admin/:userId/:adminId/:adminPassword',
+	async (req, res) => {
+		const { userId, adminId, adminPassword } = req.params;
+		if (
+			await Users.exists({
+				userId: adminId,
+				password: adminPassword,
+				admin: true,
+			})
+		) {
+			if (await Users.exists({ userId: userId })) {
 				await Users.findOneAndUpdate(
-					{ userId: req.params.userid },
-					{
-						$push: { linkedTest: req.params.testid },
-					}
+					{ userId: userId },
+					{ admin: true }
 				);
+				res.send('OK');
+			} else {
+				res.send(`There is no user with ${userId} in our system`);
 			}
-			res.sendStatus(200);
+		}
+		{
+			res.sendStatus(403);
+		}
+	}
+);
+
+UsersRouter.patch('/add/:userId/:testId', async (req, res) => {
+	const { userId, testId } = req.params;
+	try {
+		if (
+			(await Users.exists({ userId: userId })) &&
+			(await Users.findOne({ userId: userId, linkedTest: testId })) ==
+				null
+		) {
+			await Users.findOneAndUpdate(
+				{ userId: userId },
+				{ $push: { linkedTest: testId } }
+			);
+			res.send('OK');
 		} else {
 			res.sendStatus(403);
 		}
@@ -53,7 +114,7 @@ UsersRouter.patch('/add/:userid/:testid', async (req, res) => {
 });
 
 UsersRouter.post('/create', async (req, res) => {
-	const { firstName, lastName, userId, linkedTest } = req.body;
+	const { firstName, lastName, userId, linkedTest, password } = req.body;
 	if (
 		firstName != null &&
 		firstName.trim().length > 0 &&
@@ -68,6 +129,7 @@ UsersRouter.post('/create', async (req, res) => {
 				linkedTest: linkedTest == undefined ? [] : linkedTest,
 				firstName: firstName,
 				lastName: lastName,
+				password: password,
 				userId: userId,
 				answers: [],
 			});
