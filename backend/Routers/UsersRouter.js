@@ -48,7 +48,7 @@ UsersRouter.get('/connect/:userId/:userPassword', async (req, res) => {
 			res.json(
 				await Users.findOne({ userId: userId, password: userPassword })
 			);
-		else res.json("User don't found");
+		else res.send("User don't found");
 	} else {
 		res.sendStatus(404);
 	}
