@@ -147,5 +147,18 @@ UsersRouter.post('/create', async (req, res) => {
 	}
 });
 
+UsersRouter.get('/exist/:id', async (req, res) => {
+	res.json(await Users.exists({ userId: req.params.id }));
+});
+
+UsersRouter.get('/exist/:id/:password', async (req, res) => {
+	res.json(
+		await Users.exists({
+			userId: req.params.id,
+			password: req.params.password,
+		})
+	);
+});
+
 UsersRouter.get('/test/:testid', async (req, res) => {});
 export default UsersRouter;
