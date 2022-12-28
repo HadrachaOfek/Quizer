@@ -3,12 +3,13 @@ import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Dashboard from './Dashboard/Dashboard';
 import React from 'react';
-import { createTheme } from '@mui/material/styles';
+import { createTheme, makeStyles } from '@mui/material/styles';
 import Exam from './Exam/Exam';
 import { colors } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import LogsGate from './Logs/LogsGate';
 import CreateTest from './Dashboard/CreateTest';
+import Registry from './Logs/Registry';
 
 function App() {
 	return (
@@ -31,7 +32,7 @@ function App() {
 					<Routes>
 						<Route
 							path='/register'
-							element={<h1>hello</h1>}></Route>
+							element={<Registry/>}></Route>
 					</Routes>
 				</BrowserRouter>
 			</ThemeProvider>
@@ -43,7 +44,7 @@ const theme = createTheme({
 	direction: 'rtl',
 	palette: {
 		primary: {
-			main: '#E8F3F9',
+			main: '#2b7dab',
 		},
 		secondary: {
 			main: '#F4A6CD',
@@ -53,10 +54,6 @@ const theme = createTheme({
 		MuiPaper: {
 			styleOverrides: {
 				root: {
-					width: '80vw',
-					height: '80vh',
-					borderRadius: '25px',
-					padding: '25px',
 					boxSizing: 'border-box',
 				},
 			},
@@ -69,10 +66,19 @@ const theme = createTheme({
 				},
 			},
 		},
+    MuiGrid : {
+      styleOverrides:
+      {
+        container : {
+          justifyContent : 'center',
+        }
+      },
+    },
 		MuiFormHelperText: {
 			styleOverrides: {
 				root: {
-					textAlign: 'center',
+					textAlign: 'right',
+          fontSize : '10pt'
 				},
 			},
 		},
@@ -102,5 +108,15 @@ const theme = createTheme({
 		},
 	},
 });
+
+const paperPageStyle = {
+    width: '80vw',
+    height: '80vh',
+    borderRadius: '25px',
+    padding: '25px',
+};
+
+export {paperPageStyle}
+
 
 export default App;

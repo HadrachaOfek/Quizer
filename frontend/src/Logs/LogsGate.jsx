@@ -7,6 +7,7 @@ import {
 	TextField,
 	Typography,
 } from '@mui/material';
+import { paperPageStyle } from '../App';
 import { Box } from '@mui/system';
 import axios from 'axios';
 import { SHA256 } from 'crypto-js';
@@ -26,7 +27,7 @@ export default function LogsGate() {
 		if (res.data) {
 			setState(true);
 		} else {
-			window.location.replace('/register');
+			window.location.replace('/register?userid=' + userId);
 		}
 	};
 
@@ -58,7 +59,7 @@ export default function LogsGate() {
 					סיסמה לא מתאימה לשם המשתמש
 				</Alert>
 			</Snackbar>
-			<Paper variant='outlined'>
+			<Paper variant='outlined' sx={paperPageStyle}>
 				<Typography variant='h2' sx={{ paddingRight: '20%' }}>
 					ברוכים הבאים
 				</Typography>
@@ -123,7 +124,7 @@ export default function LogsGate() {
 
 const inputBoxStyle = {
 	width: '300px',
-	height: '300px',
+	height: 'fit-content',
 	display: 'flex',
 	flexDirection: 'column',
 	gap: '10px',

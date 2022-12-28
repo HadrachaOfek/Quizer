@@ -22,6 +22,7 @@ import sha256 from 'crypto-js/sha256';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import ServerAddress from '../assets/ServerAddress';
+import UsersTable from './UsersTable';
 
 export default function Dashboard() {
 	const { id, password } = useParams();
@@ -104,6 +105,11 @@ export default function Dashboard() {
 				<Grid item xs={12}>
 					<TestsList />
 				</Grid>
+        {
+          userData.admin ? (<Grid item xs={12}>
+            <UsersTable/>
+          </Grid>) : undefined
+        }
 			</Grid>
 		</React.Fragment>
 	);

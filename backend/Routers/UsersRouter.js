@@ -54,19 +54,31 @@ UsersRouter.get('/connect/:userId/:userPassword', async (req, res) => {
 	}
 });
 
-UsersRouter.get('/', async (req, res) => {
-	res.json(await Users.find());
+UsersRouter.get('/:userid/:password', async (req, res) => {
+	try {
+		if(Users.exists({userId : req.params.userid,password : req.params.password,admin : true}))
+		{
+			res.send(await Users.find());
+		}
+		else res.send(false);
+	} catch (error) {
+		res.send(false);
+	}
 });
 
 UsersRouter.get('/ids', async (req, res) => {
+	try{
 	const respon = await Users.find();
 	var ids = [];
 	respon.map(user => (ids = ids.concat(user.userId)));
 	res.json(ids);
+	}
+	catch(error) {
+		res.sendStatus(403);
+	}
 });
 
-UsersRouter.patch(
-	'/set_admin/:userId/:adminId/:adminPassword',
+UsersRouter.patch('/set_admin/:userId/:adminId/:adminPassword',
 	async (req, res) => {
 		const { userId, adminId, adminPassword } = req.params;
 		if (
@@ -92,29 +104,9 @@ UsersRouter.patch(
 	}
 );
 
-UsersRouter.patch('/add/:userId/:testId', async (req, res) => {
-	const { userId, testId } = req.params;
-	try {
-		if (
-			(await Users.exists({ userId: userId })) &&
-			(await Users.findOne({ userId: userId, linkedTest: testId })) ==
-				null
-		) {
-			await Users.findOneAndUpdate(
-				{ userId: userId },
-				{ $push: { linkedTest: testId } }
-			);
-			res.send('OK');
-		} else {
-			res.sendStatus(403);
-		}
-	} catch (error) {
-		res.sendStatus(500);
-	}
-});
 
 UsersRouter.post('/create', async (req, res) => {
-	const { firstName, lastName, userId, linkedTest, password } = req.body;
+	const { firstName, lastName, userId, password } = req.body;
 	if (
 		firstName != null &&
 		firstName.trim().length > 0 &&
@@ -126,12 +118,10 @@ UsersRouter.post('/create', async (req, res) => {
 	) {
 		if ((await Users.exists({ userId: userId })) == null) {
 			const user = new Users({
-				linkedTest: linkedTest == undefined ? [] : linkedTest,
 				firstName: firstName,
 				lastName: lastName,
 				password: password,
 				userId: userId,
-				answers: [],
 			});
 			try {
 				await user.save();
