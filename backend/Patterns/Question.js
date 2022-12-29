@@ -4,8 +4,8 @@ import pkg from 'mongoose';
 const QuestionSchema = new Schema({
 	linkedTest: { type: String, require: true },
 	type: { type: Number, require: true },
-  img : {type : String,default : ""},
-  active : {type : Boolean,default : true},
+  	img : {type : String,default : ""},
+  	active : {type : Boolean,default : true},
 	question: { type: String, require: true },
 	totalGrade: { type: Number, require: true },
 	answers: { type: Array, require: true },

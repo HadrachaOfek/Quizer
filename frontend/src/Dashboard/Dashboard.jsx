@@ -1,4 +1,5 @@
 import {
+	Alert,
 	Backdrop,
 	Box,
 	Button,
@@ -7,6 +8,7 @@ import {
 	Grid,
 	Paper,
 	Skeleton,
+	Snackbar,
 	Tooltip,
 	Typography,
 } from '@mui/material';
@@ -28,6 +30,9 @@ import TestsTable from './TestsTable';
 export default function Dashboard() {
 	const { id, password } = useParams();
 	const [userData, setUserData] = useState(false);
+	const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarSeverity, setSnackbarSeverity] = useState('succes');
+    const [snackbarMessage, setSnackbarMessage] = useState("");
 
 	useEffect(() => {
 		const getData = async () => {
@@ -45,6 +50,9 @@ export default function Dashboard() {
 
 	return (
 		<React.Fragment>
+			<Snackbar open={snackbarOpen} autoHideDuration={5000} onClose={e => setSnackbarOpen(false)}>
+                <Alert severity={snackbarSeverity}>{snackbarMessage}</Alert>
+			</Snackbar>
 			<Backdrop
 				sx={{
 					color: '#fff',
@@ -56,7 +64,7 @@ export default function Dashboard() {
 			<Tooltip title='הוסף מבחן'>
 				<Fab
 					variant='circular'
-					sx={{ position: 'absolute', left: '5vw', bottom: '5vh' }}
+					sx={{ position: 'fixed', left: '5vw', bottom: '5vh' }}
 					color='secondary'
 					onClick={e =>
 						window.location.replace(
@@ -66,7 +74,7 @@ export default function Dashboard() {
 					<AddIcon />
 				</Fab>
 			</Tooltip>
-			<Grid container sx={{ padding: '20px' }}>
+			<Grid container sx={{ padding: '20px',boxSizing : 'border-box' , width : '95vw' , margin : 'auto' }} spacing={1}>
 				<Grid
 					item
 					xs={2}
@@ -105,7 +113,7 @@ export default function Dashboard() {
 				</Grid>
 				<Grid item xs={12}>
 					{/* <TestsList /> */}
-          <TestsTable userId={id} password={password}/>
+					<TestsTable userId={id} password={password} setSnackbarMessage={setSnackbarMessage} setSnackbarOpen={setSnackbarOpen} setSnackbarSeverity={setSnackbarSeverity} />
 				</Grid>
         {
           userData.admin ? (<Grid item xs={12}>

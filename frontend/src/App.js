@@ -10,6 +10,7 @@ import { ThemeProvider } from '@emotion/react';
 import LogsGate from './Logs/LogsGate';
 import CreateTest from './Dashboard/CreateTest';
 import Registry from './Logs/Registry';
+import EditTest from './Dashboard/EditTest';
 
 function App() {
 	return (
@@ -20,21 +21,13 @@ function App() {
 						<Route
 							path='/dashboard/:id/:password'
 							element={<Dashboard />}></Route>
-					</Routes>
-					<Routes>
 						<Route
 							path='/dashboard/create_test/:id/:password'
 							element={<CreateTest />}></Route>
-					</Routes>
-          <Routes>
 						<Route
 							path='/dashboard/edit_questions/:id/:password/:testid'
-							element={<Dashboard/>}></Route>
-					</Routes>
-					<Routes>
+							element={<EditTest/>}></Route>
 						<Route path='/login' element={<LogsGate />}></Route>
-					</Routes>
-					<Routes>
 						<Route
 							path='/register'
 							element={<Registry/>}></Route>

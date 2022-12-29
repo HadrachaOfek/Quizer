@@ -60,45 +60,6 @@ TestRouter.post('/create/:id/:password', async (req, res) => {
 	}
 });
 
-TestRouter.patch('/update_users/:id/:testid', async (req, res) => {
-	if (await Test.exists({ _id: req.params.testid })) {
-		const record = await Test.findOne({ _id: req.params.testid });
-		const admins = ADMIN.concat(record.admin);
-		if (admins.indexOf(req.params.id.toString()) != -1) {
-			await Test.findOneAndUpdate(
-				{ _id: req.params.testid },
-				{ users: record.users.concat(req.body.users) }
-			);
-			res.sendStatus(200);
-		} else {
-			res.send("This user don't have premission");
-		}
-	} else {
-		res.send('Faild');
-	}
-});
-
-TestRouter.patch('/delete_users/:id/:testid', async (req, res) => {
-	if (await Test.exists({ _id: req.params.testid })) {
-		const record = await Test.findOne({ _id: req.params.testid });
-		const admins = ADMIN.concat(record.admin);
-		if (admins.indexOf(req.params.id.toString()) != -1) {
-			const users = [].concat(record.users);
-			const newUsers = users.filter(
-				e => req.body.users.indexOf(e) == -1
-			);
-			await Test.findOneAndUpdate(
-				{ _id: req.params.testid },
-				{ users: newUsers }
-			);
-			res.sendStatus(200);
-		} else {
-			res.send("This user don't have premission");
-		}
-	} else {
-		res.send('Faild');
-	}
-});
 
 TestRouter.patch('/delete_admins/:id/:testid', async (req, res) => {
 	if (await Test.exists({ _id: req.params.testid })) {
@@ -203,20 +164,23 @@ TestRouter.patch('/start_quiz/:testPasscode/:userId', async (req, res) => {
 	}
 });
 
-TestRouter.patch('/activate_test/:testId/:adminId', async (req, res) => {
+TestRouter.patch('/activate_test/:adminId/:adminPassword/:testId', async (req, res) => {
 	try {
-		const { testId, adminId } = req.params;
-		if (await Test.exists({ _id: testId, admin: adminId })) {
-			if (
-				(await Test.findById(testId)).numOfQuestions <=
-				(await Question.find({ linkedTest: testId })).length
-			) {
-				await Test.findByIdAndUpdate(testId, { active: true });
-				res.send('Test is active');
-			} else res.send('Test not completed');
-		} else res.send('Test not found or you are not an admin');
+		const { testId, adminId, adminPassword } = req.params;
+		if (await Users.exists({ userId: adminId, password: adminPassword })) {
+			if (await Test.exists({ _id: testId, admin: adminId })) {
+				if (
+					(await Test.findById(testId)).numOfQuestions <=
+					(await Question.find({ linkedTest: testId })).length
+				) {
+					await Test.findByIdAndUpdate(testId, { active: true });
+					res.send([true,'Test is active']);
+				} else res.json([false, 'Test not completed']);
+			} else res.json([false, 'Test not found or you are not an admin']);
+		}
+		else res.json([false, 'wrong admin password or admin do not exists']);
 	} catch (error) {
-		res.send('Someting went wrong');
+		res.json([false,"Error"]);
 	}
 });
 
@@ -231,20 +195,39 @@ TestRouter.patch('/is_test_active/:testId', async (req, res) => {
 	}
 });
 
-TestRouter.patch('/deactivate_test/:testId/:adminId', async (req, res) => {
+
+TestRouter.patch('/deactivate_test/:adminId/:adminPassword/:testId', async (req, res) => {
 	try {
-		const { testId, adminId } = req.params;
-		if (await Test.exists({ _id: testId, admin: adminId })) {
-			if (
-				(await Test.findById(testId)).numOfQuestions <=
-				(await Question.find({ linkedTest: testId })).length
-			) {
-				await Test.findByIdAndUpdate(testId, { active: false });
-				res.send('Test is deactive');
-			} else res.send('Test not completed');
-		} else res.send('Test not found or you are not an admin');
+		const { testId, adminId, adminPassword } = req.params;
+		if (await Users.exists({ userId: adminId, password: adminPassword })) {
+			if (await Test.exists({ _id: testId, admin: adminId })) {
+				if (
+					(await Test.findById(testId)).numOfQuestions <=
+					(await Question.find({ linkedTest: testId })).length
+				) {
+					await Test.findByIdAndUpdate(testId, { active: false });
+					res.send([true,'Test is deactive']);
+				} else res.json([false, 'Test not completed']);
+			} else res.json([false, 'Test not found or you are not an admin']);
+		}
+		else res.json([false, 'wrong admin password or admin do not exists']);
 	} catch (error) {
-		res.send('Someting went wrong');
+		res.json([false,"Error"]);
+	}
+});
+
+TestRouter.delete("/delete_test/:adminId/:adminPassword/:testId",async (req, res) => {
+	try {
+		const { testId, adminId, adminPassword } = req.params;
+		if (await Users.exists({ userId: adminId, password: adminPassword })) {
+			if (await Test.exists({ _id: testId, admin: adminId })) {
+				await Test.findByIdAndRemove(testId);
+				res.send([true, 'delete test']);
+			} else res.json([false, 'Test not found or you are not an admin']);
+		}
+		else res.json([false, 'wrong admin password or admin do not exists']);
+	} catch (error) {
+		res.json([false,"Error"]);
 	}
 });
 
