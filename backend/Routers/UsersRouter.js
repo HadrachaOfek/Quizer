@@ -54,7 +54,7 @@ UsersRouter.get('/connect/:userId/:userPassword', async (req, res) => {
 	}
 });
 
-UsersRouter.get('/:userid/:password', async (req, res) => {
+UsersRouter.get('/get_all/:userid/:password', async (req, res) => {
 	try {
 		if(Users.exists({userId : req.params.userid,password : req.params.password,admin : true}))
 		{
@@ -138,15 +138,15 @@ UsersRouter.post('/create', async (req, res) => {
 });
 
 UsersRouter.get('/exist/:id', async (req, res) => {
-	res.json(await Users.exists({ userId: req.params.id }));
+	res.send((await Users.exists({ userId: req.params.id })) !== null);
 });
 
 UsersRouter.get('/exist/:id/:password', async (req, res) => {
-	res.json(
-		await Users.exists({
+	res.send(
+		(await Users.exists({
 			userId: req.params.id,
 			password: req.params.password,
-		})
+		})) !== null
 	);
 });
 

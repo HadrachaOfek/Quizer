@@ -23,6 +23,7 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import ServerAddress from '../assets/ServerAddress';
 import UsersTable from './UsersTable';
+import TestsTable from './TestsTable';
 
 export default function Dashboard() {
 	const { id, password } = useParams();
@@ -103,7 +104,8 @@ export default function Dashboard() {
 					/>
 				</Grid>
 				<Grid item xs={12}>
-					<TestsList />
+					{/* <TestsList /> */}
+          <TestsTable userId={id} password={password}/>
 				</Grid>
         {
           userData.admin ? (<Grid item xs={12}>

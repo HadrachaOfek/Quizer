@@ -12,8 +12,6 @@ const TestSchema = new Schema({
 	active: { type: Boolean, default: false },
 	passingGrade : {type : Number , default : 60},
 	numOfQuestions: { type: Number, require: true },
-	questionsBank: { type: Array, default: [] },
-	users: { type: Array, default: [] },
 });
 
 const Test = pkg.model('Test', TestSchema);

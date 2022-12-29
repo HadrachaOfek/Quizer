@@ -20,7 +20,7 @@ function UsersTable({userId,password}) {
     useEffect(()=>{
         const fetchUsersData = async () =>
         {
-            const res = await axios.get(ServerAddress(`user/${userId}/${password}`));
+            const res = await axios.get(ServerAddress(`user/get_all/${userId}/${password}`));
             if(res.data)
             {
                 const temp = [];

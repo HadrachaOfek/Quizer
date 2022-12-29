@@ -33,27 +33,30 @@ const GeneratePasscode = async () => {
  * }
  * the call will return the test passcode and id in success
  */
-TestRouter.post('/create/:id', async (req, res) => {
-	if (req.params.id != 0 && req.body.title != null) {
-		const passcode = await GeneratePasscode();
-		const body = {
-			admin: [req.admins],
-			password: passcode,
-			title: req.body.title,
-			insturctions: req.body.insturctions,
-			logo: req.body.logo != null ? req.body.logo : '',
-			duration: req.body.duration,
-			passingGrade: req.body.passingGrade,
-			active: false,
-			numOfQuestions: req.body.numOfQuestions,
-			questionsBank: [],
-			users: req.body.users,
-		};
-		const record = new Test(body);
-		await record.save();
-		res.send(record._id);
-	} else {
-		res.send("Error one of the items don't match the formats");
+TestRouter.post('/create/:id/:password', async (req, res) => {
+	try{
+		const {id,password} = req.params;
+		if(Users.exists({userId : id, password : password})){
+			const test = new Test({
+				admin: req.body.admin,
+				title:  req.body.title,
+				insturctions:  req.body.instructions,
+				logo:  req.body.logo,
+				duration:  req.body.duration,
+				passingGrade :  req.body.passingGrade,
+				numOfQuestions:  req.body.numOfQuestions,
+				password : await GeneratePasscode(),
+			})
+			console.log("hello");
+			await test.save()
+			res.send(test._id);
+		}
+		else{
+			res.send(false);
+		}
+	}catch(e){
+		console.log(e);
+		res.send(false);
 	}
 });
 
@@ -245,7 +248,17 @@ TestRouter.patch('/deactivate_test/:testId/:adminId', async (req, res) => {
 	}
 });
 
-TestRouter.get('/', async (req, res) => {
-	res.json(await Test.find());
+TestRouter.get('/get_all/:id/:password', async (req, res) => {
+	try{
+		const {id,password} = req.params;
+		if(await Users.exists({userId : id,password : password})){
+			res.json(await Test.find({admin : id}));
+		}
+		else res.send(false);
+	}
+	catch(e)
+	{
+		res.send(false);
+	}
 });
 export default TestRouter;

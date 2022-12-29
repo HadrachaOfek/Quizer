@@ -26,6 +26,11 @@ function App() {
 							path='/dashboard/create_test/:id/:password'
 							element={<CreateTest />}></Route>
 					</Routes>
+          <Routes>
+						<Route
+							path='/dashboard/edit_questions/:id/:password/:testid'
+							element={<Dashboard/>}></Route>
+					</Routes>
 					<Routes>
 						<Route path='/login' element={<LogsGate />}></Route>
 					</Routes>
@@ -74,6 +79,12 @@ const theme = createTheme({
         }
       },
     },
+    MuiTableCell : {
+      defaultProps : 
+      {
+      }
+    }
+    ,
 		MuiFormHelperText: {
 			styleOverrides: {
 				root: {
@@ -82,6 +93,8 @@ const theme = createTheme({
 				},
 			},
 		},
+    MuiButton : {
+    }
 	},
 	typography: {
 		h1: {
@@ -110,8 +123,8 @@ const theme = createTheme({
 });
 
 const paperPageStyle = {
-    width: '80vw',
-    height: '80vh',
+    width: '90vw',
+    height: '90vh',
     borderRadius: '25px',
     padding: '25px',
 };

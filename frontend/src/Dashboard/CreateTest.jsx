@@ -1,4 +1,4 @@
-import { Paper, Box, Typography, Grid, TextField, Autocomplete, makeStyles, Button, Chip } from '@mui/material';
+import { Paper, Box, Typography, Grid, TextField, Autocomplete, makeStyles, Button, Chip, Snackbar, Alert } from '@mui/material';
 import { display } from '@mui/system';
 import axios from 'axios';
 import React from 'react';
@@ -18,6 +18,9 @@ export default function CreateTest() {
 	const [instructions,setInstructions] = useState(null);
 	const [logo,setLogo] = useState(null);
 	const [passingGrade,setPassingGrade] = useState(80);
+	const [SnackbarOpen,setSnackbarOpen] = useState(false);
+    const [snackbarSeverity,setSnackbarSeverity] = useState('succes');
+    const [snackbarMessage,setSnackbarMessage] = useState("");
 
 	const {id,password} = useParams();
 	const [admins,setAdmins] = useState([id]);
@@ -51,8 +54,46 @@ export default function CreateTest() {
 		}
 	}
 
+	const handleSubmit = async() =>{
+		if(validForm()){
+			const res = await axios.post(ServerAddress(`test/create/${id}/${password}`),{
+				admin: admins,
+				title: title.trim(),
+				insturctions: instructions.trim(),
+				logo: logo,
+				duration: duration,
+				passingGrade : passingGrade,
+				numOfQuestions: numOfQuestions,
+			});
+			console.log(res.data);
+			if(res.data)
+			{
+				setSnackbarMessage('המבחן נרשם');
+				setSnackbarSeverity('success');
+				setSnackbarOpen(true);
+				setTimeout(_ => window.location.replace(`/dashboard/edit_questions/${id}/${password}/${res.data}`));
+			}
+		}else{
+			setSnackbarMessage('אחד מהקלטים לא תקין');
+			setSnackbarSeverity('error');
+			setSnackbarOpen(true);
+		}
+	}
+
+	const validForm = () => {
+		return !(title === null || title.trim() === "" ||
+		 duration === null || duration <= 0 || numOfQuestions === null ||
+		  numOfQuestions <= 0 || instructions === null ||
+		  instructions.trim() === "" || passingGrade === null ||
+		  passingGrade < 0 || passingGrade > 100 ||admins.length >1);
+	}
+
 
 	return (
+		<React.Fragment>
+			<Snackbar open={SnackbarOpen} onClose={e=>setSnackbarOpen(false)} autoHideDuration={5000}>
+				<Alert severity={snackbarSeverity}>{snackbarMessage}</Alert>
+			</Snackbar>
 		<Box
 			sx={{
 				display: 'flex',
@@ -85,7 +126,7 @@ export default function CreateTest() {
 						</Button>
 					</Grid>
 					<Grid item sx={12} sm={10}>
-						<TextField type='text' label='הנחיות' value={instructions} onChange={e=>setInstructions(e.target.value)} fullWidth multiline rows={5}/>
+						<TextField type='text' label='הנחיות' value={instructions} onChange={e=>setInstructions(e.target.value)} fullWidth multiline rows={4}/>
 					</Grid>
 					<Grid item sx={12} sm={12}>
 					<Autocomplete
@@ -100,11 +141,17 @@ export default function CreateTest() {
 							}
 						</Box>
 					</Grid>
+					<Grid item xs={12} sx={{textAlign:'center'}}>
+						<Button variant='contained' onClick={e=> handleSubmit()}>
+							הוסף מבחן
+						</Button>
+					</Grid>
 				</Grid>
 				
 
 			</Paper>
 		</Box>
+		</React.Fragment>
 	);
 }
   
