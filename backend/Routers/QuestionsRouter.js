@@ -4,7 +4,7 @@ import Question from '../Patterns/Question.js';
 import Test from '../Patterns/Test.js';
 import Users from '../Patterns/Users.js';
 
-const QuestionRouter = Router();
+const QuestionRouter = Router(); 
 
 /**
  * When we want to create a new question and link it to a existing test
