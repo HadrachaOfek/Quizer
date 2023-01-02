@@ -21,10 +21,10 @@ export default function CreateTest() {
 	const [SnackbarOpen,setSnackbarOpen] = useState(false);
     const [snackbarSeverity,setSnackbarSeverity] = useState('succes');
     const [snackbarMessage,setSnackbarMessage] = useState("");
-
 	const {id,password} = useParams();
 	const [admins,setAdmins] = useState([id]);
 	const [avilableAdmins,setAvilableAdmins] = useState([id]);
+	
 	const filePicker = document.createElement('input')
 	filePicker.type='file';
 	filePicker.accept='image/*';

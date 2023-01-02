@@ -35,7 +35,8 @@ QuestionRouter.post('/create/:id/:password/:testid', async (req, res) => {
 		else res.send(false);
 	}
 	catch (error) {
-		res.send(fasle);
+		res.send(false);
+		console.log(error)
 	}
 });
 

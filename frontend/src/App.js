@@ -12,7 +12,9 @@ import CreateTest from './Dashboard/CreateTest';
 import Registry from './Logs/Registry';
 import EditTest from './Dashboard/EditTest';
 
+
 function App() {
+	
 	return (
 		<React.Fragment>
 			<ThemeProvider theme={theme}>
