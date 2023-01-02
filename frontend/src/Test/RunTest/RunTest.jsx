@@ -2,7 +2,7 @@ import Question from "./components/Question/Question";
 import './RunTest.css';
 import ofekLogo from '../resources/images/ofek.png';
 import hadrachaLogo from '../resources/images/hadracha.png';
-import { example1, example2, example3 } from "./QuestionsBank/Questions";
+import { example1, example2, example3, example4 } from "./QuestionsBank/Questions";
 
 
 function RunTest(props) {
@@ -20,6 +20,8 @@ function RunTest(props) {
             <Question {...example1}></Question>
             <Question {...example2}></Question>
             <Question {...example3}></Question>
+            <Question {...example4}></Question>
+
         </div>
 
     </div>
