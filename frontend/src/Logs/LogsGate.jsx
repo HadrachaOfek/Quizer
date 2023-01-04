@@ -3,6 +3,7 @@ import {
 	Alert,
 	Button,
 	Paper,
+	Slide,
 	Snackbar,
 	TextField,
 	Typography,
@@ -87,9 +88,9 @@ export default function LogsGate() {
 							המשך
 							<ArrowBackIosIcon color='primary' />
 						</Button>
-					</Box>
+						</Box>
 				) : (
-					<Box sx={inputBoxStyle}>
+					<Slide direction='up'  in={state} ><Box sx={inputBoxStyle}>
 						<TextField
 							type='number'
 							label='מספר מזהה'
@@ -115,7 +116,8 @@ export default function LogsGate() {
 							התחבר
 							<ArrowBackIosIcon color='primary' />
 						</Button>
-					</Box>
+						</Box>
+						</Slide>
 				)}
 			</Paper>
 		</Box>
