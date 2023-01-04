@@ -114,7 +114,7 @@ const TableHeader = () => {
     )
 }
 
-const TestsTableRow = ({title,active,password,activateTest,deactivateTest,_id,deleteTest,editTest}) => {
+const TestsTableRow = ({ title, active, password, activateTest, deactivateTest, _id, deleteTest, editTest }) => {
     return(
             <TableRow>
                 <TableCell>{title}</TableCell>
@@ -132,7 +132,7 @@ const TestsTableRow = ({title,active,password,activateTest,deactivateTest,_id,de
                             <PowerSettingsNewIcon/>
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title='הגדרות' onClick={e=>editTest()}>
+                    <Tooltip title='הגדרות' onClick={e=>editTest(_id)}>
                         <IconButton color='primary' >
                             <Settings/>
                         </IconButton>

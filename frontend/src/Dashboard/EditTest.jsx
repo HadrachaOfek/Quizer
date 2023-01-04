@@ -49,9 +49,10 @@ function EditTest() {
 	}, [])
 
 	const getData = async () => {
-		const res = await axios.get(ServerAddress(`get_linkes_questions/${testid}`));
+		const res = await axios.get(ServerAddress(`question/get_linkes_questions/${testid}`));
 		if (res.status === 200) {
 			setAllQuestions(res.data);
+			console.log(res.data);
 			testHasQuestions = true;
 		} else {
 			testHasQuestions = false;
@@ -59,7 +60,7 @@ function EditTest() {
 	}
 
 	const addQuestion = async () => {
-		const res = await axios.post(ServerAddress(`create/${id}/${password}/${testid}`), {
+		const res = await axios.post(ServerAddress(`question/create/${id}/${password}/${testid}`), {
 			linkedTest: testid,
 			type: type,
 			img: img,
