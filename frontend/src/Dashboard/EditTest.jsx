@@ -65,7 +65,7 @@ function EditTest() {
 					{questionStatus()}
 				</Grid>
 
-				<Grid sm={9} item>
+				<Grid sm={9} item className="question-screen">
 					{
 						addQuestionScreen ?
 							<AddQuestion></AddQuestion>

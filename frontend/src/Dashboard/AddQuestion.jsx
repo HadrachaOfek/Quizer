@@ -81,9 +81,14 @@ export default function AddQuestion() {
         setAnswers(answers);
     }
     return (
-        <div><Typography variant='h4' sx={{ margin: '10px' }}>
-            הגדרות שאלה חדשה
-        </Typography>
+        <div style={{
+            height: '96%',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '10px'
+        }}><Typography variant='h4' sx={{ margin: '10px' }}>
+                הגדרות שאלה חדשה
+            </Typography>
             <Grid container spacing={1}>
                 <Grid item sx={12} sm={6}>
                     <FormControl fullWidth>
