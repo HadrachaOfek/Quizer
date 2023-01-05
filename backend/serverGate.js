@@ -10,8 +10,6 @@
 import express from 'express';
 import cors from 'cors';
 import pkg from 'mongoose';
-import Test from './Patterns/Test.js';
-import Question from './Patterns/Question.js';
 import dbUrl, { ADMIN, PASSWORD, USERNAME } from './ENV.js';
 import TestRouter from './Routers/TestRouter.js';
 import QuestionRouter from './Routers/QuestionsRouter.js';
@@ -19,7 +17,9 @@ import UsersRouter from './Routers/UsersRouter.js';
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb' }));
 pkg.set('strictQuery', false);
 
 const PORT = 2001;
@@ -36,7 +36,7 @@ app.listen(PORT, async () => {
 app.get('/', async (req, res) => {
 	try {
 		console.log(await GeneratePasscode());
-	} catch (error) {}
+	} catch (error) { }
 	res.send('hello');
 });
 
