@@ -47,6 +47,7 @@ QuestionRouter.post('/create/:id/:password/:testid', async (req, res) => {
 QuestionRouter.patch('/delete/:id/:password/:testid/:questionid', async (req, res) => {
 	try{
 		const { id, password, testid, questionid } = req.params;
+		console.log(questionid);
 		if (await Users.exists({ userId: id, password: password })) {
 			if (await Test.exists({ _id: testid, admin: id })) {
 				await Question.findByIdAndDelete(questionid);
@@ -57,7 +58,7 @@ QuestionRouter.patch('/delete/:id/:password/:testid/:questionid', async (req, re
 		else res.send(false);
 	}
 	catch (error) {
-		res.send(fasle);
+		res.send(false);
 	}
 });
 

@@ -10,8 +10,6 @@
 import express from 'express';
 import cors from 'cors';
 import pkg from 'mongoose';
-import Test from './Patterns/Test.js';
-import Question from './Patterns/Question.js';
 import dbUrl, { ADMIN, PASSWORD, USERNAME } from './ENV.js';
 import TestRouter from './Routers/TestRouter.js';
 import QuestionRouter from './Routers/QuestionsRouter.js';
