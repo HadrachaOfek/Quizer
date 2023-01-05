@@ -11,6 +11,8 @@ import LogsGate from './Logs/LogsGate';
 import CreateTest from './Dashboard/CreateTest';
 import Registry from './Logs/Registry';
 import EditTest from './Dashboard/EditTest';
+import TestCloseScreen from './Exam/TestCloseScreen';
+import ExamPage from './Exam/ExamPage';
 
 
 function App() {
@@ -32,7 +34,12 @@ function App() {
 						<Route path='/login' element={<LogsGate />}></Route>
 						<Route
 							path='/register'
-							element={<Registry/>}></Route>
+							element={<Registry />}></Route>
+						<Route path='/exam/:userId/:testId' element={<ExamPage />}>
+							
+						</Route>
+						<Route path='/exam_test_close_screen' element={<TestCloseScreen />} />
+						<Route path='/exam_entry' element={<TestCloseScreen/>}/>
 					</Routes>
 				</BrowserRouter>
 			</ThemeProvider>
@@ -79,7 +86,15 @@ const theme = createTheme({
       {
       }
     }
-    ,
+		,
+		MuiTableCell: {
+			styleOverrides: {
+				root: {
+					textAlign : 'center',
+				}
+			}
+		
+	},
 		MuiFormHelperText: {
 			styleOverrides: {
 				root: {
@@ -89,7 +104,7 @@ const theme = createTheme({
 			},
 		},
     MuiButton : {
-    }
+		},
 	},
 	typography: {
 		h1: {
@@ -121,7 +136,8 @@ const paperPageStyle = {
     width: '90vw',
     height: '90vh',
     borderRadius: '25px',
-    padding: '25px',
+	padding: '25px',
+	margin : '10px auto',
 };
 
 export {paperPageStyle}

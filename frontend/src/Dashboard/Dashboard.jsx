@@ -92,7 +92,7 @@ export default function Dashboard() {
 						}}>
 						<EngineeringIcon
 							sx={{
-								background: '#BD9CE9',
+								background: 'white',
 								padding: '10px',
 								borderRadius: '50%',
 								fontSize: '64px',
@@ -117,7 +117,7 @@ export default function Dashboard() {
 				</Grid>
         {
           userData.admin ? (<Grid item xs={12}>
-            <UsersTable/>
+						<UsersTable userId={id} password={password} setSnackbarMessage={setSnackbarMessage} setSnackbarOpen={setSnackbarOpen} setSnackbarSeverity={setSnackbarSeverity} />
           </Grid>) : undefined
         }
 			</Grid>
