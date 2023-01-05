@@ -2,6 +2,8 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import {
 	Alert,
 	Button,
+	Link,
+	Modal,
 	Paper,
 	Slide,
 	Snackbar,
@@ -21,6 +23,9 @@ export default function LogsGate() {
 	const [state, setState] = useState(false);
 	const [password, setPassword] = useState('');
 	const [errorSnackBar, setErrorSnackBar] = useState(false);
+	const [infoSnackbar, setInfoSnackbar] = useState(false);
+
+	document.title = "כניסה"
 
 	const checkIfExist = async () => {
 		const res = await axios.get(ServerAddress(`user/exist/${userId}`));
@@ -28,7 +33,7 @@ export default function LogsGate() {
 		if (res.data) {
 			setState(true);
 		} else {
-			window.location.replace('/register?userid=' + userId);
+			setInfoSnackbar(true);
 		}
 	};
 
@@ -44,15 +49,8 @@ export default function LogsGate() {
 		}
 	};
 	return (
-		<Box
-			sx={{
-				width: '100vw',
-				height: '100vh',
-				display: 'flex',
-				justifyContent: 'center',
-				alignItems: 'center',
-			}}>
-			<Snackbar
+		<React.Fragment>
+		<Snackbar
 				open={errorSnackBar}
 				autoHideDuration={3000}
 				onClose={_ => setErrorSnackBar(false)}>
@@ -60,12 +58,20 @@ export default function LogsGate() {
 					סיסמה לא מתאימה לשם המשתמש
 				</Alert>
 			</Snackbar>
-			<Paper variant='outlined' sx={paperPageStyle}>
-				<Typography variant='h2' sx={{ paddingRight: '20%' }}>
-					ברוכים הבאים
-				</Typography>
-				<Typography variant='h1'>אתר המבחנים</Typography>
+			<Snackbar
+				open={infoSnackbar}
+				autoHideDuration={3000}
+				onClose={_ => setInfoSnackbar(false)}>
+				<Alert variant='filled' severity='info'>
+					מספר מזהה לא רשום במערכת, 
+					<Button color='secondary' onClick={e=> window.location.replace('/register?userid=' + userId)}>
+						למעבר להרשמה
+					</Button>
+				</Alert>
+			</Snackbar>
+			<Box sx={{display:'flex',justifyContent:'center',alignContent:'center',width:'100vw',height:'100vh'}}>
 				{!state ? (
+					<Paper variant='outlined' sx={inputPaperStyle} >
 					<Box sx={inputBoxStyle}>
 						<TextField
 							type='number'
@@ -89,8 +95,11 @@ export default function LogsGate() {
 							<ArrowBackIosIcon color='primary' />
 						</Button>
 						</Box>
+						</Paper>
 				) : (
-					<Slide direction='up'  in={state} ><Box sx={inputBoxStyle}>
+						<Slide in={state} direction='up'>
+							<Paper variant='outlined' sx={inputPaperStyle} >
+					<Box sx={inputBoxStyle}>
 						<TextField
 							type='number'
 							label='מספר מזהה'
@@ -116,11 +125,12 @@ export default function LogsGate() {
 							התחבר
 							<ArrowBackIosIcon color='primary' />
 						</Button>
-						</Box>
-						</Slide>
+							</Box>
+							</Paper>
+							</Slide>
 				)}
-			</Paper>
-		</Box>
+				</Box>
+			</React.Fragment>
 	);
 }
 
@@ -134,3 +144,10 @@ const inputBoxStyle = {
 	justifyContent: 'center',
 	alignItems: 'center',
 };
+
+const inputPaperStyle = {
+	display: 'flex',
+	width: 'fit-content',
+	padding: '15px',
+	margin: 'auto'
+}

@@ -39,6 +39,7 @@ import Users from '../Patterns/Users.js';
  *
  */
 
+const ID_PATTERN = RegExp('[0-9]{7,9}');
 const UsersRouter = Router();
 
 UsersRouter.get('/connect/:userId/:userPassword', async (req, res) => {
@@ -56,11 +57,13 @@ UsersRouter.get('/connect/:userId/:userPassword', async (req, res) => {
 
 UsersRouter.get('/get_all/:userid/:password', async (req, res) => {
 	try {
-		if(Users.exists({userId : req.params.userid,password : req.params.password,admin : true}))
-		{
-			res.send(await Users.find());
+		if ((new RegExp("[0-9]{7,9}")).test(req.params.userid)) {
+			if (Users.exists({ userId: req.params.userid, password: req.params.password, admin: true })) {
+				res.send(await Users.find());
+			}
+			else res.send(false);
 		}
-		else res.send(false);
+		else res.send(false)
 	} catch (error) {
 		res.send(false);
 	}
@@ -78,31 +81,54 @@ UsersRouter.get('/ids', async (req, res) => {
 	}
 });
 
-UsersRouter.patch('/set_admin/:userId/:adminId/:adminPassword',
+UsersRouter.patch('/set_admin/:adminId/:adminPassword/:userId',
 	async (req, res) => {
-		const { userId, adminId, adminPassword } = req.params;
-		if (
-			await Users.exists({
-				userId: adminId,
-				password: adminPassword,
-				admin: true,
-			})
-		) {
-			if (await Users.exists({ userId: userId })) {
-				await Users.findOneAndUpdate(
-					{ userId: userId },
-					{ admin: true }
-				);
-				res.send('OK');
-			} else {
-				res.send(`There is no user with ${userId} in our system`);
-			}
-		}
-		{
-			res.sendStatus(403);
+		try {
+			const { userId, adminId, adminPassword } = req.params;
+			if (ID_PATTERN.test(userId) && ID_PATTERN.test(adminId)) {
+				if (
+					await Users.exists({
+						userId: adminId,
+						password: adminPassword,
+						admin: true,
+					})
+				) {
+					if (await Users.exists({ userId: userId })) {
+						await Users.findOneAndUpdate(
+							{ userId: userId },
+							{ admin: true }
+						);
+						res.json([true, "user deleted"]);
+					} else {
+						res.json([false, "user not found"]);
+					}
+				}
+				else res.json([false, "admin not found"]);
+			} else res.json([false, "invalid ids"]);
+		} catch (e) {
+			res.sendStatus(404);
 		}
 	}
 );
+
+UsersRouter.delete('/delete/:adminId/:adminPassword/:userId', async (req, res) => {
+	try {
+		const { adminId, adminPassword, userId } = req.params;
+		if (ID_PATTERN.test(userId) && ID_PATTERN.test(adminId)) {
+			if (await Users.exists({ admin: true, userId: adminId, password: adminPassword }))
+			{
+				if (await Users.exists({ userId: userId })) {
+					await Users.findOneAndDelete({ userId: userId });
+					res.json([true,"user deleted"])
+				}
+				else res.json([false, "User not found"]);
+			}
+			else res.json([false,"Admin not found"])
+		}
+	} catch (error) {
+		res.statusCode(404);
+	}
+});
 
 
 UsersRouter.post('/create', async (req, res) => {
@@ -149,6 +175,26 @@ UsersRouter.get('/exist/:id/:password', async (req, res) => {
 		})) !== null
 	);
 });
+
+UsersRouter.patch('/reset_password/:adminId/:adminPassword/:userId/:userPassword', async (req, res) => {
+	const { adminId, adminPassword, userId, userPassword } = req.params;
+	try {
+		if (await Users.exists({ userId: adminId, password: adminPassword, admin: true })) {
+			if (await Users.exists({ userId: userId })) {
+				await Users.findOneAndUpdate({ userId: userId }, { password: userPassword });
+				res.send([true,"User password updated"])
+			}
+			else {
+				res.json([false,"User not found"])
+			}
+		} else {
+			res.json([false,"Admin not found"])
+		}
+	} catch (e) {
+		res.sendStatus(404);
+	}
+	
+})
 
 UsersRouter.get('/test/:testid', async (req, res) => {});
 export default UsersRouter;
