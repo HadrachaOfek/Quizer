@@ -1,22 +1,26 @@
 import logo from './logo.svg';
 import './App.css';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Dashboard from './Dashboard/Dashboard';
 import React from 'react';
-import { createTheme, makeStyles } from '@mui/material/styles';
+import { createTheme, makeStyles, recomposeColor } from '@mui/material/styles';
 import Exam from './Exam/Exam';
 import { colors } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import LogsGate from './Logs/LogsGate';
 import CreateTest from './Dashboard/CreateTest';
 import Registry from './Logs/Registry';
-import EditTest from './Dashboard/EditTest';
+import EditTest from './Dashboard/Edit test/EditTest';
 import TestCloseScreen from './Exam/TestCloseScreen';
 import ExamPage from './Exam/ExamPage';
+import HomePage from './Logs/HomePage';
+import EditUsers from './Dashboard/Edit test/EditUsers';
 
 
 function App() {
-	
+	const userId = sessionStorage.getItem("userId");
+	const password = sessionStorage.getItem("password");
+	const isValid = userId !== null && password != null;
 	return (
 		<React.Fragment>
 			<ThemeProvider theme={theme}>
@@ -31,7 +35,8 @@ function App() {
 						<Route
 							path='/dashboard/edit_questions/:id/:password/:testid'
 							element={<EditTest/>}></Route>
-						<Route path='/login' element={<LogsGate />}></Route>
+						<Route path='/login' element={isValid ? <Navigate to={`/dashboard/${userId}/${password}`} /> : <LogsGate />}></Route>
+						<Route path='/dashboard/edit_users/:id/:password/:testId' element={<EditUsers/>}/>
 						<Route
 							path='/register'
 							element={<Registry />}></Route>
@@ -39,7 +44,9 @@ function App() {
 							
 						</Route>
 						<Route path='/exam_test_close_screen' element={<TestCloseScreen />} />
-						<Route path='/exam_entry' element={<TestCloseScreen/>}/>
+						<Route path='/exam_entry' element={<TestCloseScreen />} />
+						<Route path='/home' element={<HomePage />}></Route>
+						<Route path='/' element={<Navigate to="/home"/>}/>
 					</Routes>
 				</BrowserRouter>
 			</ThemeProvider>

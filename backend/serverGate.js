@@ -14,7 +14,7 @@ import dbUrl, { ADMIN, PASSWORD, USERNAME } from './ENV.js';
 import TestRouter from './Routers/TestRouter.js';
 import QuestionRouter from './Routers/QuestionsRouter.js';
 import UsersRouter from './Routers/UsersRouter.js';
-
+import UsersTestRouter from './Routers/UsersTestRouter.js';
 const app = express();
 app.use(cors());
 
@@ -43,3 +43,4 @@ app.get('/', async (req, res) => {
 app.use('/test', TestRouter);
 app.use('/question', QuestionRouter);
 app.use('/user', UsersRouter);
+app.use('/users_test', UsersTestRouter);
