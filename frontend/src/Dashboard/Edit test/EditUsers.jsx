@@ -25,6 +25,8 @@ import { useParams } from "react-router-dom";
 import ServerAddress from "../../assets/ServerAddress";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useContext } from "react";
+import { SnackbarContext } from "../../App";
 
 function EditUsers() {
   const { id, password, testId } = useParams();
@@ -35,7 +37,7 @@ function EditUsers() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
 
-  const [isSnackOpen, setIsSnackOpen] = useState(false);
+  const { popAlert } = useContext(SnackbarContext);
 
   const loadData = async () => {
     const res = await axios.get(
@@ -44,7 +46,7 @@ function EditUsers() {
     if (res.data[0]) {
       setData(res.data[1]);
     } else {
-      console.log(res.data[1]);
+      popAlert("error", res.data[1]);
     }
   };
 
@@ -62,7 +64,7 @@ function EditUsers() {
       });
       setPossibleUsers(dict);
     } else {
-      console.log(res.data[1]);
+      popAlert("error", res.data[1]);
     }
   };
   useEffect(() => {
@@ -85,7 +87,7 @@ function EditUsers() {
       loadData();
       loadPossibleUsers();
     } else {
-      console.log(res.data);
+      popAlert("error", res.data[1]);
     }
     setFirstName("");
     setLastName("");
@@ -101,10 +103,6 @@ function EditUsers() {
   };
   return (
     <React.Fragment>
-      <Snackbar
-        open={isSnackOpen}
-        onClose={(e) => setIsSnackOpen(false)}
-      ></Snackbar>
       <Container>
         <Stack
           direction="row"

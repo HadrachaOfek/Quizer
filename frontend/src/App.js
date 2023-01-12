@@ -16,22 +16,30 @@ import ExamPage from './Exam/ExamPage';
 import HomePage from './Logs/HomePage';
 import EditUsers from './Dashboard/Edit test/EditUsers';
 
+export const SnackbarContext = createContext(null);
 
 function App() {
 	const userId = sessionStorage.getItem("userId");
 	const password = sessionStorage.getItem("password");
 	const isValid = userId !== null && password != null;
-	//const Snackbar = createContext(null);
-	const [isSnackOpen, setIsSnackOpen] = useState(true);
+	const [isSnackOpen, setIsSnackOpen] = useState(false);
 	const [SnackMessege, setSnackMessege] = useState("");
 	const [snackSeverity,setSnackSeverity] = useState('error')
+	const popAlert = (severity, messege) => {
+		setSnackSeverity(severity);
+		setSnackMessege(messege);
+		setIsSnackOpen(true);
+	}
 
 	return (
 		<React.Fragment>
+
 			<ThemeProvider theme={theme}>
 				<Snackbar open={isSnackOpen} onClose={e => setIsSnackOpen(false)} autoHide={5000}>
 					<Alert severity={snackSeverity}>{ SnackMessege}</Alert>
 				</Snackbar>
+				<SnackbarContext.Provider value={{ popAlert }}>
+					
 				<BrowserRouter>
 					<Routes>
 						<Route
@@ -56,7 +64,8 @@ function App() {
 						<Route path='/home' element={<HomePage />}></Route>
 						<Route path='/' element={<Navigate to="/home"/>}/>
 					</Routes>
-				</BrowserRouter>
+					</BrowserRouter>
+				</SnackbarContext.Provider>
 			</ThemeProvider>
 		</React.Fragment>
 	);
