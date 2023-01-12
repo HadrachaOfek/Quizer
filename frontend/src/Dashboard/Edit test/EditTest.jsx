@@ -3,13 +3,25 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import ServerAddress from "../../assets/ServerAddress";
-import { Grid, Button, Icon, Tooltip } from "@mui/material";
+import {
+  Grid,
+  Button,
+  Icon,
+  Tooltip,
+  Container,
+  Stack,
+  Paper,
+  Divider,
+  Typography,
+} from "@mui/material";
 import "./Questions.css";
 import Skeleton from "@mui/material/Skeleton";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AddQuestion from "./AddQuestion";
 import Question from "./Question";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import { Box } from "@mui/system";
 
 function EditTest() {
   const { id, testid, password } = useParams();
@@ -43,21 +55,22 @@ function EditTest() {
     if (questions === "loading") {
       return (
         <React.Fragment>
-          <Skeleton animation="wave" />
-          <Skeleton animation="wave" />
-          <Skeleton animation="wave" />
-          <Skeleton animation="wave" />
-          <Skeleton animation="wave" />
-          <Skeleton animation="wave" />
-          <Skeleton animation="wave" />
-          <Skeleton animation="wave" />
-          <Skeleton animation="wave" />
+          {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((e, index) => {
+            return (
+              <Skeleton
+                animation="wave"
+                variant="rectangular"
+                key={index}
+                width={100}
+                height={20}
+              />
+            );
+          })}
         </React.Fragment>
       );
     } else if (questions) {
       return (
         <React.Fragment>
-          <h4 className="menu-header">השאלות שלי</h4>
           {questions.map((question, index) => {
             return (
               <div className="question" key={index}>
@@ -75,7 +88,7 @@ function EditTest() {
                     <DeleteIcon
                       sx={{ paddingLeft: "3px", color: "white" }}
                       fontSize={"small"}
-                      onClick={() => deleteModal()}
+                      onClick={() => deleteQuestion(question)}
                     ></DeleteIcon>
                   </Tooltip>
                   <Tooltip title={"ערוך שאלה"}>
@@ -115,13 +128,39 @@ function EditTest() {
     }
   }
 
-  function deleteModal() {}
+  const deleteQuestion = async (question) => {
+    const res = await axios.patch(
+      ServerAddress(
+        `question/delete/${id}/${password}/${testid}/${question._id}`
+      )
+    );
+    if (res.data) {
+      alert("השאלה נמחקה בהצלחה !");
+      setTimeout((_) =>
+        window.location.replace(
+          `/dashboard/edit_questions/${id}/${password}/${testid}`
+        )
+      );
+    }
+  };
 
   return (
-    <React.Fragment>
+    <Container sx={{ height: "100vh", width: "100vw" }}>
       <Grid container spacing={1}>
-        <Grid sm={3} item className="questions-menu">
-          {questionStatus()}
+        <Grid sm={3} item>
+          <Stack
+            divider={<Divider orientation="horizontal" />}
+            component={Paper}
+            padding={"10px"}
+            height={"100vh"}
+            spacing={1}
+          >
+            <Stack direction="row">
+              <Typography variant="h4">בנק שאלות</Typography>
+              <AccountBalanceIcon />
+            </Stack>
+            {questionStatus()}
+          </Stack>
         </Grid>
 
         <Grid sm={9} className="screen" item>
@@ -142,7 +181,7 @@ function EditTest() {
           )}
         </Grid>
       </Grid>
-    </React.Fragment>
+    </Container>
   );
 }
 

@@ -5,7 +5,7 @@ import Dashboard from './Dashboard/Dashboard';
 import React, { createContext, useState } from 'react';
 import { createTheme, makeStyles, recomposeColor } from '@mui/material/styles';
 import Exam from './Exam/Exam';
-import { Alert, Snackbar } from '@mui/material';
+import { Alert, Backdrop, CircularProgress, Snackbar } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import LogsGate from './Logs/LogsGate';
 import CreateTest from './Dashboard/CreateTest';
@@ -14,7 +14,9 @@ import EditTest from './Dashboard/Edit test/EditTest';
 import TestCloseScreen from './Exam/TestCloseScreen';
 import ExamPage from './Exam/ExamPage';
 import HomePage from './Logs/HomePage';
-import EditUsers from './Dashboard/Edit test/EditUsers';
+import EditUsers from './Dashboard/EditUsers';
+import EditQuestionsBank from './Dashboard/EditQuestionsBank';
+import ExamEntry from './Exam/ExamEntry';
 
 export const SnackbarContext = createContext(null);
 
@@ -31,6 +33,11 @@ function App() {
 		setIsSnackOpen(true);
 	}
 
+	const [isBackdrop, setIsBackdrop] = useState(false);
+	const openBackdrop = () => setIsBackdrop(true);
+	const closeBackdrop = () => setIsBackdrop(false);
+
+
 	return (
 		<React.Fragment>
 
@@ -38,7 +45,10 @@ function App() {
 				<Snackbar open={isSnackOpen} onClose={e => setIsSnackOpen(false)} autoHide={5000}>
 					<Alert severity={snackSeverity}>{ SnackMessege}</Alert>
 				</Snackbar>
-				<SnackbarContext.Provider value={{ popAlert }}>
+				<Backdrop open={isBackdrop} sx={{zIndex : 100}}>
+					<CircularProgress color='secondary'/>
+				</Backdrop>
+				<SnackbarContext.Provider value={{ popAlert,openBackdrop,closeBackdrop }}>
 					
 				<BrowserRouter>
 					<Routes>
@@ -56,13 +66,11 @@ function App() {
 						<Route
 							path='/register'
 							element={<Registry />}></Route>
-						<Route path='/exam/:userId/:testId' element={<ExamPage />}>
-							
-						</Route>
+							<Route path='/exam/:userId/:testId/:testName' element={<ExamPage />}/>
+							<Route path='/exam_entry/:userId/:testId' element={<ExamEntry/>}/>
 						<Route path='/exam_test_close_screen' element={<TestCloseScreen />} />
-						<Route path='/exam_entry' element={<TestCloseScreen />} />
-						<Route path='/home' element={<HomePage />}></Route>
-						<Route path='/' element={<Navigate to="/home"/>}/>
+						<Route path='/exam_log' element={<HomePage />} />
+						<Route path='/' element={<Navigate to="/exam_log"/>}/>
 					</Routes>
 					</BrowserRouter>
 				</SnackbarContext.Provider>
@@ -133,7 +141,7 @@ const theme = createTheme({
 	typography: {
 		h1: {
 			textAlign: 'center',
-			fontSize: '72pt',
+			fontSize: '54pt',
 		},
 		h2: {
 			textAlign: 'right',

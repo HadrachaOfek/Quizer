@@ -8,28 +8,12 @@ import Typography from "@mui/material/Typography";
 import ServerAddress from "../../assets/ServerAddress";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import "./Questions.css";
+//import "./Questions.css";
 import { useState } from "react";
 
 export default function Question(props) {
   const { id, testid, password } = useParams();
   const question = props.question;
-
-  const deleteQuestion = async () => {
-    const res = await axios.patch(
-      ServerAddress(
-        `question/delete/${id}/${password}/${testid}/${question._id}`
-      )
-    );
-    if (res.data) {
-      alert("השאלה נמחקה בהצלחה !");
-      setTimeout((_) =>
-        window.location.replace(
-          `/dashboard/edit_questions/${id}/${password}/${testid}`
-        )
-      );
-    }
-  };
 
   return (
     <React.Fragment>

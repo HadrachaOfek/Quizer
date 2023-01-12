@@ -184,6 +184,21 @@ TestRouter.patch('/activate_test/:adminId/:adminPassword/:testId', async (req, r
 	}
 });
 
+TestRouter.get("/get_insturctions/:testId", async (req, res) => {
+	try {
+		const { testId } = req.params;
+		if (await Test.exists({ _id: testId })) {
+			const test = (await Test.findById(testId,{insturctions : true,title : true,duration : true}));
+			res.json([true, test]);
+		}
+		else {
+			res.json([false,"test not exist"])
+		}
+	} catch (error) {
+		res.json([false, "server error"]);
+	}
+})
+
 TestRouter.patch('/is_test_active/:testId', async (req, res) => {
 	try {
 		const { testId } = req.params;

@@ -8,16 +8,24 @@ const UsersTestRouter = Router();
 const ID_PATTERN = new RegExp('[0-9]{7,9}');
 const PASSCODE_PATTERN = new RegExp('[A-Z]{8}');
 
-UsersTestRouter.get("/is_not_tested/:testId/:userId", async (req, res) => {
+UsersTestRouter.get("/is_not_tested/:passcode/:userId", async (req, res) => {
     try {
-        const { testId, userId } = req.params;
+        const { passcode, userId } = req.params;
         if (PASSCODE_PATTERN.test(passcode) && ID_PATTERN.test(userId)) {
-            if (await UsersTest.exists({ userId: userId, linkedTest: testId })){
-                res.json([true,true])
-            }
-            else res.json([true,false])
+            var testId;
+            if (testId = await Test.exists({ password: passcode })) {
+                if (await UsersTest.exists({ userId: userId, linkedTest: testId._id })) {
+                    if (await UsersTest.exists({ userId: userId, linkedTest: testId._id, endTime: null })) {
+                        res.json([true, true,testId._id])
+                    }
+                    else {
+                        res.json([true, false]);
+                    }
+                }
+                else res.json([false, "user not register to the test"]);
+            }else res.json([false,"no test with this passcode"])
         }
-        else res.json([false,"passcode or test id invalid"]);
+        else res.json([false,"passcode or id invalid"]);
     } catch (error) {
         res.json([false, "Server error"]);
     }
@@ -114,7 +122,7 @@ UsersTestRouter.get("get_personal_test/:userId/:testId", async (req, res) => {
             if (await UsersTest.exists({ linkedTest: testId, userId: userId })) {
                 res.json([true, await UsersTest.findOne({ linkedTest: testId, userId: userId })]);
             }
-            else res.json([false, "user doesn't init test"]);
+            else res.json([false, "user doesn't register to this test"]);
         }
         else res.json([false, "test not active"]);
     } catch (error) {
@@ -127,11 +135,19 @@ UsersTestRouter.patch("/start_test/:testId/:usersId", async (req, res) => {
         const { testId, usersId } = req.params;
         if (ID_PATTERN.test(usersId))
         {
-            if (await UsersTest.exists({ userId: usersId, linkedTest: testId, startTime: null })) {
+            if (await UsersTest.exists({ userId: usersId, linkedTest: testId, endTime : {$gt : Date.now()} })) {
                 if (await Test.exists({ _id: testId, active: true })) {
                     const test = await Test.findOne({ _id: testId });
-                    const _id = (await UsersTest.findOneAndUpdate({ userId: usersId, linkedTest: testId, startTime: null }, {startTime : Date.now() , endTime : (Date.now() + (1000*60 * test.duration))}))._id;
-                    res.json([true,await UsersTest.findById(_id)]);
+                    if (await UsersTest.exists({ userId: usersId, linkedTest: testId, endTime: null })) {
+                        const _id = (await UsersTest.findOneAndUpdate({ userId: usersId, linkedTest: testId, endTime: { $gt: Date.now() } }, { startTime: Date.now(), endTime: (Date.now() + (1000 * 60 * test.duration)) }))._id;
+                        res.json([true,await UsersTest.findById(_id)]);
+                    }
+                    else {
+                        const _id = (await UsersTest.findOne({ userId: usersId, linkedTest: testId, endTime: { $gt: Date.now() } }))._id;
+                        const userTest = await UsersTest.findById(_id);
+                        const questions = [];
+                        res.json([true,await UsersTest.findById(_id)]);
+                    }
                 }
                 else res.json([false,"test close or not exist"])
             }

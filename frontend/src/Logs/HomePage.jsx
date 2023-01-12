@@ -1,11 +1,37 @@
-import { Box, Button, Fab, Paper, TextField, Typography } from "@mui/material";
-import React from "react";
+import {
+  Box,
+  Button,
+  Fab,
+  Paper,
+  SnackbarContent,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { SnackbarContext } from "../App";
+import React, { useContext } from "react";
 import { useState } from "react";
 import SettingsIcon from "@mui/icons-material/Settings";
+import axios from "axios";
+import ServerAddress from "../assets/ServerAddress";
 
 function HomePage() {
+  const { popAlert } = useContext(SnackbarContext);
   const [passcode, setPasscode] = useState("");
   const [userId, setUserId] = useState("");
+
+  const enterTest = async () => {
+    const res = await axios.get(
+      ServerAddress(`users_test/is_not_tested/${passcode}/${userId}`)
+    );
+    if (res.data[0]) {
+      if (res.data[1]) {
+        popAlert("success", "הנך מועבר למבחן");
+        window.location.href = `/exam_entry/${userId}/${res.data[2]}`;
+      } else {
+        popAlert("info", "בחינה בוצעה");
+      }
+    } else popAlert("error", res.data[1]);
+  };
   return (
     <Box
       sx={{
@@ -46,7 +72,9 @@ function HomePage() {
             !userId.match("\\d{7,9}") ? "מספר מזהה באורך 9 או 7 ספרות" : " "
           }
         />
-        <Button variant="contained">כניסה למבחן</Button>
+        <Button variant="contained" onClick={(e) => enterTest()}>
+          כניסה למבחן
+        </Button>
       </Paper>
       <Fab
         onClick={(e) => {

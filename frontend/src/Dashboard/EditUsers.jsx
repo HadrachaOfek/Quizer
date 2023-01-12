@@ -22,11 +22,11 @@ import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import ServerAddress from "../../assets/ServerAddress";
+import ServerAddress from "../assets/ServerAddress";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useContext } from "react";
-import { SnackbarContext } from "../../App";
+import { SnackbarContext } from "../App";
 
 function EditUsers() {
   const { id, password, testId } = useParams();
