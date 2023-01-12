@@ -6,6 +6,7 @@ import {
   Fab,
   IconButton,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -14,6 +15,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import axios from "axios";
 import React from "react";
@@ -22,6 +24,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import ServerAddress from "../../assets/ServerAddress";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 function EditUsers() {
   const { id, password, testId } = useParams();
@@ -31,6 +34,8 @@ function EditUsers() {
   const [userId, setUserId] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+
+  const [isSnackOpen, setIsSnackOpen] = useState(false);
 
   const loadData = async () => {
     const res = await axios.get(
@@ -96,6 +101,10 @@ function EditUsers() {
   };
   return (
     <React.Fragment>
+      <Snackbar
+        open={isSnackOpen}
+        onClose={(e) => setIsSnackOpen(false)}
+      ></Snackbar>
       <Container>
         <Stack
           direction="row"
@@ -201,7 +210,13 @@ const UsersRow = ({ userId, firstName, lastName, _id, endTime }) => {
       <TableCell>{firstName}</TableCell>
       <TableCell>{lastName}</TableCell>
       <TableCell>{endTime ? "בוצע" : "ממתין"}</TableCell>
-      <TableCell></TableCell>
+      <TableCell>
+        <Tooltip title="מחק">
+          <IconButton>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      </TableCell>
     </TableRow>
   );
 };

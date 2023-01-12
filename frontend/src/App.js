@@ -2,10 +2,10 @@ import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Dashboard from './Dashboard/Dashboard';
-import React from 'react';
+import React, { createContext, useState } from 'react';
 import { createTheme, makeStyles, recomposeColor } from '@mui/material/styles';
 import Exam from './Exam/Exam';
-import { colors } from '@mui/material';
+import { Alert, Snackbar } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import LogsGate from './Logs/LogsGate';
 import CreateTest from './Dashboard/CreateTest';
@@ -21,9 +21,17 @@ function App() {
 	const userId = sessionStorage.getItem("userId");
 	const password = sessionStorage.getItem("password");
 	const isValid = userId !== null && password != null;
+	//const Snackbar = createContext(null);
+	const [isSnackOpen, setIsSnackOpen] = useState(true);
+	const [SnackMessege, setSnackMessege] = useState("");
+	const [snackSeverity,setSnackSeverity] = useState('error')
+
 	return (
 		<React.Fragment>
 			<ThemeProvider theme={theme}>
+				<Snackbar open={isSnackOpen} onClose={e => setIsSnackOpen(false)} autoHide={5000}>
+					<Alert severity={snackSeverity}>{ SnackMessege}</Alert>
+				</Snackbar>
 				<BrowserRouter>
 					<Routes>
 						<Route

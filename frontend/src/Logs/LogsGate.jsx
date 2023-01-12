@@ -2,6 +2,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import {
   Alert,
   Button,
+  Fab,
   Link,
   Modal,
   Paper,
@@ -17,6 +18,7 @@ import { SHA256 } from "crypto-js";
 import React from "react";
 import { useState } from "react";
 import ServerAddress from "../assets/ServerAddress";
+import HomeIcon from "@mui/icons-material/Home";
 
 export default function LogsGate() {
   const [userId, setUserId] = useState("");
@@ -149,6 +151,22 @@ export default function LogsGate() {
           </Slide>
         )}
       </Box>
+      <Fab
+        onClick={(e) => {
+          window.location.replace("/home");
+        }}
+        variant="extended"
+        color="secondary"
+        sx={{
+          position: "absolute",
+          right: "1rem",
+          bottom: "1rem",
+          gap: "3px",
+        }}
+      >
+        <HomeIcon />
+        <Typography variant="h4">כניסה למבחן</Typography>
+      </Fab>
     </React.Fragment>
   );
 }

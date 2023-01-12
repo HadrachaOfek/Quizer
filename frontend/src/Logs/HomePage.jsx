@@ -1,6 +1,7 @@
-import { Box, Button, Paper, TextField, Typography } from "@mui/material";
+import { Box, Button, Fab, Paper, TextField, Typography } from "@mui/material";
 import React from "react";
 import { useState } from "react";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 function HomePage() {
   const [passcode, setPasscode] = useState("");
@@ -21,7 +22,9 @@ function HomePage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          gap: "10px",
+          gap: "2vh",
+          width: "20vw",
+          minWidth: "300px",
           padding: "25px",
         }}
       >
@@ -45,6 +48,22 @@ function HomePage() {
         />
         <Button variant="contained">כניסה למבחן</Button>
       </Paper>
+      <Fab
+        onClick={(e) => {
+          window.location.replace("/login");
+        }}
+        variant="extended"
+        color="secondary"
+        sx={{
+          position: "absolute",
+          right: "1rem",
+          bottom: "1rem",
+          gap: "3px",
+        }}
+      >
+        <SettingsIcon />
+        <Typography variant="h4">כניסה למשתמשים רשומים </Typography>
+      </Fab>
     </Box>
   );
 }
