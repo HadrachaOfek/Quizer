@@ -1,23 +1,22 @@
 import logo from './logo.svg';
+import {deepmerge} from '@mui/utils'
 import './App.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import Dashboard from './Dashboard/Dashboard';
-import React, { createContext, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import { createTheme, makeStyles, recomposeColor } from '@mui/material/styles';
-import Exam from './Exam/Exam';
-import { Alert, Backdrop, CircularProgress, Snackbar } from '@mui/material';
+import { Alert, Backdrop, CircularProgress, Modal, responsiveFontSizes, Snackbar } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
-import LogsGate from './Logs/LogsGate';
-import CreateTest from './Dashboard/CreateTest';
-import Registry from './Logs/Registry';
-import EditTest from './Dashboard/Edit test/EditTest';
-import TestCloseScreen from './Exam/TestCloseScreen';
-import ExamPage from './Exam/ExamPage';
-import HomePage from './Logs/HomePage';
-import EditUsers from './Dashboard/EditUsers';
-import EditQuestionsBank from './Dashboard/EditQuestionsBank';
-import ExamEntry from './Exam/ExamEntry';
-
+import '@fontsource/assistant';
+import BlueBackground from './components/BlueBackground';
+import TestClose from './pages/TestClose';
+import ExamGate from './pages/ExamGate';
+import { red } from '@mui/material/colors';
+import PurpleBackground from './components/PurpleBackground';
+import AccountGate from './pages/AccountGate';
+import Registration from './pages/Registration';
+import Dashboard from './pages/Dashboard';
+import EditTest from './pages/EditTest';
+import loadingLogo from './assets/loadingLogo.gif';
 export const SnackbarContext = createContext(null);
 
 function App() {
@@ -26,69 +25,70 @@ function App() {
 	const isValid = userId !== null && password != null;
 	const [isSnackOpen, setIsSnackOpen] = useState(false);
 	const [SnackMessege, setSnackMessege] = useState("");
-	const [snackSeverity,setSnackSeverity] = useState('error')
+	const [snackSeverity, setSnackSeverity] = useState('error')
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [modalChild, setModalChild] = useState("");
 	const popAlert = (severity, messege) => {
 		setSnackSeverity(severity);
 		setSnackMessege(messege);
 		setIsSnackOpen(true);
 	}
 
+	const popModal = (child) => {
+		setModalChild(child);
+		setIsModalOpen(true);
+	}
+
 	const [isBackdrop, setIsBackdrop] = useState(false);
 	const openBackdrop = () => setIsBackdrop(true);
 	const closeBackdrop = () => setIsBackdrop(false);
+	const closeModal = () => setIsModalOpen(false);
 
 
 	return (
 		<React.Fragment>
-
 			<ThemeProvider theme={theme}>
-				<Snackbar open={isSnackOpen} onClose={e => setIsSnackOpen(false)} autoHide={5000}>
+				<Modal
+					open={isModalOpen}
+					onClose={e => setIsModalOpen(false)}>
+					<React.Fragment>
+					{
+						modalChild
+					}
+					</React.Fragment>
+				</Modal>
+				<Snackbar open={isSnackOpen} anchorOrigin={{vertical : 'bottom',horizontal : 'center'}} onClose={e => setIsSnackOpen(false)} autoHide={5000}>
 					<Alert severity={snackSeverity}>{ SnackMessege}</Alert>
 				</Snackbar>
-				<Backdrop open={isBackdrop} sx={{zIndex : 100}}>
-					<CircularProgress color='secondary'/>
+				<Backdrop open={isBackdrop} sx={{zIndex : 100,background : 'white'}}>
+					<img src={loadingLogo} width="30%" />
 				</Backdrop>
-				<SnackbarContext.Provider value={{ popAlert,openBackdrop,closeBackdrop }}>
-					
+				<SnackbarContext.Provider value={{ popAlert,openBackdrop,closeBackdrop,popModal,closeModal }}>
 				<BrowserRouter>
-					<Routes>
-						<Route
-							path='/dashboard/:id/:password'
-							element={<Dashboard />}></Route>
-						<Route
-							path='/dashboard/create_test/:id/:password'
-							element={<CreateTest />}></Route>
-						<Route
-							path='/dashboard/edit_questions/:id/:password/:testid'
-							element={<EditTest/>}></Route>
-						<Route path='/login' element={isValid ? <Navigate to={`/dashboard/${userId}/${password}`} /> : <LogsGate />}></Route>
-						<Route path='/dashboard/edit_users/:id/:password/:testId' element={<EditUsers/>}/>
-						<Route
-							path='/register'
-							element={<Registry />}></Route>
-							<Route path='/exam/:userId/:testId/:testName' element={<ExamPage />}/>
-							<Route path='/exam_entry/:userId/:testId' element={<ExamEntry/>}/>
-						<Route path='/exam_test_close_screen' element={<TestCloseScreen />} />
-						<Route path='/exam_log' element={<HomePage />} />
-						<Route path='/' element={<Navigate to="/exam_log"/>}/>
-					</Routes>
+						<ThemeProvider theme={BlueTheme}>
+						<Routes>
+								<Route path='/' element={<Navigate to="/exam/gate" />} />
+								<Route path='/exam/gate' element={<ExamGate />} />
+								<Route path='/exam/test_close' element={<BlueBackground><TestClose/></BlueBackground>}/>
+						</Routes>
+						</ThemeProvider>
+						<ThemeProvider theme={PurpleTheme}>
+							<Routes>
+								<Route path='/accounts/gate' element={<AccountGate/>}/>
+								<Route path='/accounts/registration' element={<Registration />} />
+								<Route path='/accounts/dashboard/:userId/:password' element={<Dashboard />} />
+								<Route path='/accounts/edit_test/:userId/:password' element={<EditTest />} />
+							</Routes>
+						</ThemeProvider>
 					</BrowserRouter>
 				</SnackbarContext.Provider>
-			</ThemeProvider>
+				</ThemeProvider>
 		</React.Fragment>
 	);
 }
 
-const theme = createTheme({
+let theme = createTheme({
 	direction: 'rtl',
-	palette: {
-		primary: {
-			main: '#2b7dab',
-		},
-		secondary: {
-			main: '#F4A6CD',
-		},
-	},
 	components: {
 		MuiPaper: {
 			styleOverrides: {
@@ -104,6 +104,13 @@ const theme = createTheme({
 					width: 'fit-content',
 				},
 			},
+		},
+		MuiCard: {
+			styleOverrides: {
+				root: {
+					borderRadius : '15px'
+				}
+			}
 		},
     MuiGrid : {
       styleOverrides:
@@ -139,13 +146,15 @@ const theme = createTheme({
 		},
 	},
 	typography: {
+		fontFamily: 'assistant',
 		h1: {
 			textAlign: 'center',
-			fontSize: '54pt',
+			fontSize: '48pt',
 		},
 		h2: {
 			textAlign: 'right',
-			fontSize: '48pt',
+			fontSize: '36pt',
+			fontWeight: 'bold',
 		},
 		h4: {
 			textAlign: 'center',
@@ -157,12 +166,36 @@ const theme = createTheme({
 			fontWeight: 'bold',
 			textAlign: 'right',
 		},
+		h6: {
+			fontSize: '20pt',
+			fontWeight: 'bold',
+			textAlign : 'center'
+		},
 		caption: {
 			fontSize: '12pt',
 			width: '100%',
+			textAlign : 'center'
 		},
 	},
 });
+
+const PurpleTheme =responsiveFontSizes(createTheme(deepmerge(theme,{
+	palette: {
+		primary: {
+			main: "#AC73E1",
+			dark: '#7b1fa2',
+			light : '#ba68c8',
+		},
+	}
+})));
+
+const BlueTheme = responsiveFontSizes(createTheme(deepmerge(theme,{
+	palette: {
+		primary: {
+			main: "#498ce6",
+		}
+	}
+})));
 
 const paperPageStyle = {
     width: '90vw',
@@ -171,6 +204,7 @@ const paperPageStyle = {
 	padding: '25px',
 	margin : '10px auto',
 };
+
 
 export {paperPageStyle}
 

@@ -6,103 +6,111 @@ import Question from '../Patterns/Question.js';
 
 const TestRouter = Router();
 
-const GeneratePasscode = async () => {
+const activeTests = new Map();
+const activeTestsIdToPassword = new Map();
+
+const GeneratePasscode = () => {
 	var passcode = '';
 	for (let i = 0; i < 8; i++) {
-		passcode += String.fromCharCode(65 + Math.floor(Math.random() * 26));
+		if (Math.random() > 0.5) {
+			passcode += String.fromCharCode(65 + Math.floor(Math.random() * 26));
+		}
+		else {
+			passcode += String.fromCharCode(48 + Math.floor(Math.random() * 10));
+		}
 	}
-	const res = await Test.findOne({ Password: passcode });
-	if (res == null) {
-		return passcode;
+	if (activeTests.has(passcode)) {
+		return GeneratePasscode();
 	}
-	GeneratePasscode();
+	return passcode;
 };
 
 /**
  * When we want to config a new test.
- * we need to call /test/create/<admin id> 
+ * we need to call /test/new_test/<user id>/<user pssword>
  * and pass a body with:
  * {
-		title: String,
-		insturctions: String,
-		logo: String,
-		duration: Int,
-		numOfQuestions: Int,
-		passingGrade : Int,
-		users: [String]
+		owner: automaticly set the creator,
+		coOwner : {type : Array, require : true},
+		title: { type: String, require: true },
+		instructions: { type: String, require: true },
+		logo: { type: String },
+		duration: { type: Number },
+		passingGrade : {type : Number , default : 60},
+		numOfQuestions: { type: Number, require: true },
  * }
  * the call will return the test passcode and id in success
  */
-TestRouter.post('/create/:id/:password', async (req, res) => {
+TestRouter.post('/new_test/:userId/:userPassword', async (req, res) => {
 	try{
-		const {id,password} = req.params;
-		if(Users.exists({userId : id, password : password})){
+		const { userId, userPassword } = req.params;
+		const { coOwner, title, instructions, logo, duration, passingGrade, numOfQuestions } = req.body;
+		if(Users.exists({userId : userId, password : userPassword})){
 			const test = new Test({
-				admin: req.body.admin,
-				title:  req.body.title,
-				insturctions:  req.body.instructions,
-				logo:  req.body.logo,
-				duration:  req.body.duration,
-				passingGrade :  req.body.passingGrade,
-				numOfQuestions:  req.body.numOfQuestions,
-				password : await GeneratePasscode(),
+				owner : userId,
+				coOwner: coOwner,
+				title:  title,
+				instructions:  instructions,
+				logo:  logo,
+				duration:  duration,
+				passingGrade :  passingGrade,
+				numOfQuestions:  numOfQuestions,
 			})
-			console.log("hello");
 			await test.save()
-			res.send(test._id);
+			res.json([true,test._id]);
 		}
 		else{
-			res.send(false);
+			res.send([false,"User not found"]);
 		}
-	}catch(e){
+	} catch (e) {
+		console.log("######### ERROR IN NEW TEST #########")
 		console.log(e);
-		res.send(false);
+		res.send([false,"server error"]);
 	}
 });
 
 
-TestRouter.patch('/delete_admins/:id/:testid', async (req, res) => {
-	if (await Test.exists({ _id: req.params.testid })) {
-		const record = await Test.findOne({ _id: req.params.testid });
-		if (
-			ADMIN.concat(record.admin).indexOf(req.params.id.toString()) != -1
-		) {
-			const admins = record.admin;
-			const newAdmins = admins.filter(
-				e => req.body.admins.indexOf(e) == -1
-			);
-			await Test.findOneAndUpdate(
-				{ _id: req.params.testid },
-				{ admin: newAdmins.length > 0 ? newAdmins : admins }
-			);
-			res.sendStatus(200);
-		} else {
-			res.send("This user don't have premission");
-		}
-	} else {
-		res.send('Faild');
-	}
-});
-
-TestRouter.patch('/update_admins/:id/:testid', async (req, res) => {
+/**
+ * When we want to edit an existing test.
+ * we need to call /test/edit_test/<user id>/<user pssword>
+ * and pass a body with:
+ * {
+		owner: automaticly set the creator,
+		coOwner : {type : Array, require : true},
+		title: { type: String, require: true },
+		instructions: { type: String, require: true },
+		logo: { type: String },
+		duration: { type: Number },
+		passingGrade : {type : Number , default : 60},
+		numOfQuestions: { type: Number, require: true },
+ * }
+ * the call will return the test passcode and id in success
+ */
+TestRouter.patch('/edit_test/:userId/:userPassword/:testId', async (req, res) => {
 	try {
-		if (await Test.exists({ _id: req.params.testid })) {
-			const record = await Test.findOne({ _id: req.params.testid });
-			const admins = ADMIN.concat(record.admin);
-			if (admins.indexOf(req.params.id.toString()) != -1) {
-				await Test.findOneAndUpdate(
-					{ _id: req.params.testid },
-					{ admin: record.users.concat(req.body.admins) }
-				);
-				res.sendStatus(200);
-			} else {
-				res.send("This user don't have premission");
-			}
-		} else {
-			res.send('Faild');
+		const { userId, userPassword, testId } = req.params;
+		const { coOwner, title, instructions, logo, duration, passingGrade, numOfQuestions } = req.body;
+		//Cheking if the user is exists
+		if (await Users.exists({ userId: userId, password: userPassword })) {
+			console.log(await Test.exists({ $or: [{ coOwner: userId , _id : testId}, { owner: userId , _id : testId }] }));
+			//Checking if the user is an owner or co owner of the test
+			if (await Test.exists({ $or: [{ coOwner: userId , _id : testId}, { owner: userId , _id : testId }] })) {
+				await Test.findByIdAndUpdate(testId, {
+					owner : userId,
+					coOwner: coOwner,
+					title:  title,
+					instructions:  instructions,
+					logo:  logo,
+					duration:  duration,
+					passingGrade :  passingGrade,
+					numOfQuestions:  numOfQuestions,
+				});
+				res.json([true, "Test updated"]);
+			} else res.json([false, "The test may not be exists or the user isn't associate"]);
 		}
+		else res.json([false, "This user not exists"]);
 	} catch (error) {
-		res.send('Something goes wrong');
+		res.json([false, "Server Error"]);
 	}
 });
 
@@ -164,32 +172,45 @@ TestRouter.patch('/start_quiz/:testPasscode/:userId', async (req, res) => {
 	}
 });
 
-TestRouter.patch('/activate_test/:adminId/:adminPassword/:testId', async (req, res) => {
+/**
+ * allow us to activate the test iff the test is completed
+ */
+TestRouter.patch('/activate_test/:ownerId/:ownerPassword/:testId', async (req, res) => {
 	try {
-		const { testId, adminId, adminPassword } = req.params;
-		if (await Users.exists({ userId: adminId, password: adminPassword })) {
-			if (await Test.exists({ _id: testId, admin: adminId })) {
+		const { testId, ownerId, ownerPassword } = req.params;
+		if (activeTestsIdToPassword.has(testId)) {
+			res.json([true, "test already activated"]);
+		}
+		//checks if the owner is a real user
+		if (await Users.exists({ userId: ownerId, password: ownerPassword })) {
+			//checks if the test is real
+			if (await Test.exists({ _id: testId, $or: [{ owner: ownerId }, {coOwner : ownerId}] })) {
+				//checks if there is enough questions to open the test
 				if (
 					(await Test.findById(testId)).numOfQuestions <=
 					(await Question.find({ linkedTest: testId })).length
 				) {
-					await Test.findByIdAndUpdate(testId, { active: true });
+					const password = GeneratePasscode();
+					activeTests.set(password, await Test.findById(testId));
+					activeTestsIdToPassword.set(testId, password);
 					res.send([true,'Test is active']);
 				} else res.json([false, 'Test not completed']);
-			} else res.json([false, 'Test not found or you are not an admin']);
+			} else res.json([false, 'Test not found or you are not an owner']);
 		}
-		else res.json([false, 'wrong admin password or admin do not exists']);
+		else res.json([false, 'wrong user password or user not exists']);
 	} catch (error) {
-		res.json([false,"Error"]);
+		res.json([false,"Server Error"]);
 	}
 });
 
-TestRouter.get("/get_insturctions/:testId", async (req, res) => {
+TestRouter.get("/get_instructions/:testId", async (req, res) => {
 	try {
 		const { testId } = req.params;
-		if (await Test.exists({ _id: testId })) {
-			const test = (await Test.findById(testId,{insturctions : true,title : true,duration : true}));
-			res.json([true, test]);
+		if (activeTestsIdToPassword.has(testId)) {
+			if (activeTests.has(activeTestsIdToPassword.get(testId))) {
+				res.json([true, activeTests.get(activeTestsIdToPassword.get(testId)).instructions]);
+			}
+			else	res.json([false,"error"]);
 		}
 		else {
 			res.json([false,"test not exist"])
@@ -202,43 +223,57 @@ TestRouter.get("/get_insturctions/:testId", async (req, res) => {
 TestRouter.patch('/is_test_active/:testId', async (req, res) => {
 	try {
 		const { testId } = req.params;
-		if (await Test.exists({ _id: testId })) {
-			res.send((await Test.findById(testId)).active);
-		} else res.send('Test not found');
-	} catch (error) {
-		res.send('Someting went wrong');
-	}
-});
-
-
-TestRouter.patch('/deactivate_test/:adminId/:adminPassword/:testId', async (req, res) => {
-	try {
-		const { testId, adminId, adminPassword } = req.params;
-		if (await Users.exists({ userId: adminId, password: adminPassword })) {
-			if (await Test.exists({ _id: testId, admin: adminId })) {
-				if (
-					(await Test.findById(testId)).numOfQuestions <=
-					(await Question.find({ linkedTest: testId })).length
-				) {
-					await Test.findByIdAndUpdate(testId, { active: false });
-					res.send([true,'Test is deactive']);
-				} else res.json([false, 'Test not completed']);
-			} else res.json([false, 'Test not found or you are not an admin']);
+		if (activeTestsIdToPassword.has(testId)) {
+			res.json([true, true]);
 		}
-		else res.json([false, 'wrong admin password or admin do not exists']);
+		else {
+			res.json([true,false])
+		}
 	} catch (error) {
-		res.json([false,"Error"]);
+		res.json([false,"Server Error"]);
 	}
 });
 
-TestRouter.delete("/delete_test/:adminId/:adminPassword/:testId",async (req, res) => {
+
+TestRouter.patch('/deactivate_test/:ownerId/:ownerPassword/:testId', async (req, res) => {
 	try {
-		const { testId, adminId, adminPassword } = req.params;
-		if (await Users.exists({ userId: adminId, password: adminPassword })) {
-			if (await Test.exists({ _id: testId, admin: adminId })) {
+		const { testId, ownerId, ownerPassword } = req.params;
+		if (!activeTestsIdToPassword.has(testId)) {
+			res.json([true, "test not active"]);
+		}
+		//checks if the owner is a real user
+		if (await Users.exists({ userId: ownerId, password: ownerPassword })) {
+			//checks if the test is real
+			if (await Test.exists({ _id: testId, $or: [{ owner: ownerId }, {coOwner : ownerId}] })) {
+					const password = activeTestsIdToPassword.get(testId);
+					if (activeTests.has(password)) {
+						activeTests.delete(password);
+					}
+					activeTestsIdToPassword.delete(password);
+					res.send([true,'Test is deactivate']);
+			} else res.json([false, 'Test not found or you are not an owner']);
+		}
+		else res.json([false, 'wrong user password or user not exists']);
+	} catch (error) {
+		res.json([false,"Server Error"]);
+	}
+});
+
+TestRouter.delete("/delete_test/:ownerId/:ownerPassword/:testId",async (req, res) => {
+	try {
+		const { testId, ownerId, ownerPassword } = req.params;
+		if (await Users.exists({ userId: ownerId, password: ownerPassword })) {
+			if (await Test.exists({ _id: testId, owner: ownerId })) {
+				if (activeTestsIdToPassword.has(testId)) {
+					if (activeTests.has(activeTestsIdToPassword.get(testId))) {
+						activeTests.delete(activeTestsIdToPassword.get(testId));
+					}
+					activeTestsIdToPassword.delete(testId);
+				}
+				await Question.deleteMany({ linkedTest: testId });
 				await Test.findByIdAndRemove(testId);
 				res.send([true, 'delete test']);
-			} else res.json([false, 'Test not found or you are not an admin']);
+			} else res.json([false, 'Test not found or you are not the owner']);
 		}
 		else res.json([false, 'wrong admin password or admin do not exists']);
 	} catch (error) {
@@ -246,17 +281,40 @@ TestRouter.delete("/delete_test/:adminId/:adminPassword/:testId",async (req, res
 	}
 });
 
-TestRouter.get('/get_all/:id/:password', async (req, res) => {
+TestRouter.get('/get_all/:ownerId/:ownerPassword', async (req, res) => {
 	try{
-		const {id,password} = req.params;
-		if(await Users.exists({userId : id,password : password})){
-			res.json(await Test.find({admin : id}));
+		const { ownerId, ownerPassword } = req.params;
+		//checks if the user exists 
+		if (await Users.exists({ userId: ownerId, password: ownerPassword })) {
+			const tests = await Test.find({ $or: [{ coOwner: ownerId }, { owner: ownerId }] });
+			const toReturn = [];
+			tests.forEach(test => {
+				toReturn.push({_id : test._id,title : test.title,active : activeTestsIdToPassword.has(test._id)})
+			})
+			res.json([true,toReturn]);
 		}
-		else res.send(false);
+		else res.json([false,"User not exists"]);
 	}
 	catch(e)
 	{
-		res.send(false);
+		res.json([false,"Server Error"]);
 	}
 });
+
+TestRouter.get('/get_test_info/:ownerId/:ownerPassword/:testId', async (req, res) => {
+	try{
+		const { ownerId, ownerPassword,testId } = req.params;
+		if (await Users.exists({ userId: ownerId, password: ownerPassword })) {
+			const tests = await Test.findOne({_id : testId, $or: [{ coOwner: ownerId }, { owner: ownerId }] });
+			res.json([true,tests]);
+		}
+		else res.json([false,"User not exists"]);
+	}
+	catch(e)
+	{
+		res.json([false,"Server Error"]);
+	}
+});
+
+
 export default TestRouter;

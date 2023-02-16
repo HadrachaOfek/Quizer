@@ -18,24 +18,47 @@ const QuestionRouter = Router();
  *
  * return false upon error else return the question id
  */
-QuestionRouter.post('/create/:id/:password/:testid', async (req, res) => {
+QuestionRouter.post('/new_questions/:userId/:userPassword/:testid', async (req, res) => {
 	try{
-		const {id,password,testid} = req.params;
-		if (await Users.exists({ userId: id, password: password })) {
-			if (await Test.exists({ _id: testid, admin: id })) {
+		const {userId,userPassword,testid} = req.params;
+		if (await Users.exists({ userId: userId, password: userPassword })) {
+			if (await Test.exists({ _id: testid, $or: [{coOwner : userId}, {owner : userId}] })) {
 				var question = new Question({
 					...req.body,
 					linkedTest: testid,
 				})
 				await question.save();
-				res.send(question._id);
+				res.json([true,question._id]);
 			}
-			else res.send(false);
+			else res.json([false,"Test not exists or the user isn't associate"]);
 		}
-		else res.send(false);
+		else res.json([false,"User not exists"]);
 	}
 	catch (error) {
-		res.send(false);
+		res.json([false,"Server error"]);
+		console.log(error)
+	}
+});
+
+QuestionRouter.patch('/edit_questions/:userId/:userPassword/:testid/:questionid', async (req, res) => {
+	try{
+		const {userId,userPassword,testid,questionid} = req.params;
+		if (await Users.exists({ userId: userId, password: userPassword })) {
+			if (await Test.exists({ _id: testid, $or: [{ coOwner: userId }, { owner: userId }] })) {
+				if (await Question.exists({ _id: questionid })) {
+					await Question.findByIdAndUpdate(questionid, {
+						...req.body,
+						linkedTest: testid,
+					})
+					res.json([true, question._id]);
+				} res.json([false, "Question not found"]);
+			}
+			else res.json([false,"Test not exists or the user isn't associate"]);
+		}
+		else res.json([false,"User not exists"]);
+	}
+	catch (error) {
+		res.json([false,"Server error"]);
 		console.log(error)
 	}
 });
@@ -44,18 +67,20 @@ QuestionRouter.post('/create/:id/:password/:testid', async (req, res) => {
  * when we want to delete a question
  * we'll call "question/delete/<admin id>/password/<test id>/<question id>"
  */
-QuestionRouter.patch('/delete/:id/:password/:testid/:questionid', async (req, res) => {
+QuestionRouter.patch('/delete/:id/:password/:testId/:questionid', async (req, res) => {
 	try{
-		const { id, password, testid, questionid } = req.params;
-		console.log(questionid);
+		const { id, password, testid, questionid,testId } = req.params;
 		if (await Users.exists({ userId: id, password: password })) {
-			if (await Test.exists({ _id: testid, admin: id })) {
-				await Question.findByIdAndDelete(questionid);
-				res.send(true);
+			if (Question.exists({ _id: questionid })) {
+				if (Test.exists({ _id: testId, $or: [{ owner: id }, { coOwner: id }] })) {
+					await Question.findByIdAndDelete(questionid);
+					res.json([true, "question deleted"]);
+				}
+				else res.json([false, "User not associate with the test"]);
 			}
-			else res.send(false);
+			else res.json([false, "question no found"]);
 		}
-		else res.send(false);
+		else res.json([false,"user not exists"]);
 	}
 	catch (error) {
 		res.send(false);
@@ -70,12 +95,12 @@ QuestionRouter.patch('/delete/:id/:password/:testid/:questionid', async (req, re
 QuestionRouter.get('/get_linkes_questions/:testid', async (req, res) => {
 	try {
 		if (await Test.exists({ _id: req.params.testid })) {
-			res.json(await Question.find({ linkedTest: req.params.testid }));
+			res.json([true,await Question.find({ linkedTest: req.params.testid })]);
 		} else {
-			res.send(false);
+			res.send([false,"Test not exists"]);
 		}
 	} catch (error) {
-		res.send(false);
+		res.send([false,"Server Error"]);
 	}
 });
 

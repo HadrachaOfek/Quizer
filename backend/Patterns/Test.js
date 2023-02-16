@@ -3,13 +3,13 @@ import pkg from 'mongoose';
 const { Schema } = pkg;
 
 const TestSchema = new Schema({
-	admin: { type: Array, require: true },
-	password: { type: String },
+	owner: { type: String, require: true },
+	coOwner : {type : Array, require : true},
 	title: { type: String, require: true },
-	insturctions: { type: String, require: true },
+	instructions: { type: String, require: true },
 	logo: { type: String },
 	duration: { type: Number },
-	active: { type: Boolean, default: false },
+	createAt : {type : Date,default : Date.now()},
 	passingGrade : {type : Number , default : 60},
 	numOfQuestions: { type: Number, require: true },
 });

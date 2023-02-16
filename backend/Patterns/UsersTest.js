@@ -3,8 +3,8 @@ import pkg from 'mongoose';
 const { Schema } = pkg;
 
 const UsersTestSchema = new Schema({
-    linkedTest : {type : String,require : true},
-	firstName: { type: String, require: true },
+    linkedTest: { type: String, require: true },
+    firstName: { type: String, require: true },
 	lastName: { type: String , require : true},
 	userId: { type: String, require: true },
     startTime: { type: Date, default: null },

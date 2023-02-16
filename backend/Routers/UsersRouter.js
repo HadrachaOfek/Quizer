@@ -46,12 +46,25 @@ UsersRouter.get('/connect/:userId/:userPassword', async (req, res) => {
 	const { userId, userPassword } = req.params;
 	if (!isNaN(userId) && (userId.length == 7 || userId.length == 9)) {
 		if (await Users.exists({ userId: userId, password: userPassword }))
-			res.json(
-				await Users.findOne({ userId: userId, password: userPassword })
-			);
-		else res.send("User don't found");
+			res.json([true, true]);
+		else res.json([false,"User don't found"]);
 	} else {
-		res.sendStatus(404);
+		res.json([false, "Server error"]);
+	}
+});
+
+UsersRouter.get("/get_hello/:userId/:userPassword", async (req, res) => {
+	try {
+		const { userId, userPassword } = req.params;
+		if (!isNaN(userId) && (userId.length == 7 || userId.length == 9)) {
+			if (await Users.exists({ userId: userId, password: userPassword }))
+				res.json([true, await Users.findOne({ userId: userId, password: userPassword },{firstName : 1,lastName : 1})]);
+			else res.json([false,"User don't found"]);
+		} else {
+			res.json([false, "Server error"]);
+		}
+	} catch (error) {
+		res.json([false, "Server Error"]);
 	}
 });
 

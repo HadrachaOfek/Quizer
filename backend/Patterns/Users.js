@@ -7,6 +7,7 @@ const UsersSchema = new Schema({
 	admin: { type: Boolean, default: false },
 	lastName: { type: String, require: true },
 	userId: { type: String, require: true },
+	createdAt : {type : Date , default : Date.now()},
 });
 
 const Users = pkg.model('Users', UsersSchema);

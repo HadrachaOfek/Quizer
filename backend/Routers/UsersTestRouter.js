@@ -35,7 +35,6 @@ UsersTestRouter.patch("/build_pesonal_quiz/:adminId/:adminPassword/:testId", asy
     try {
         const { adminId,adminPassword,testId } = req.params;
         const { userId, firstName, lastName } = req.body;
-        console.log(ID_PATTERN.test(userId), ID_PATTERN.test(adminId),userId);
         if (ID_PATTERN.test(userId) && ID_PATTERN.test(adminId))
         {
             if (await Users.exists({ userId: adminId, password: adminPassword })) {
@@ -45,12 +44,9 @@ UsersTestRouter.patch("/build_pesonal_quiz/:adminId/:adminPassword/:testId", asy
                         const questions = await Question.find({ linkedTest: testId, active: true })
                         const userQuestions = [];
                         questions.sort((a, b) => 1 - Math.random()).slice(0, test.numOfQuestions).map((element, index) => {
-                            const ans = [];
-                            element.answers.map((e) => { e !== null ? ans.push(e.answer) : null });
                             userQuestions.push({
-                                questions: element.question,
                                 linkedQuestion: element._id,
-                                answers: ans
+                                answers : [],
                             })
                         })
                         const toSend = new UsersTest({
@@ -70,7 +66,6 @@ UsersTestRouter.patch("/build_pesonal_quiz/:adminId/:adminPassword/:testId", asy
         }
         else res.json([false,"false user id"])
     } catch (e) {
-        console.log(e);
         res.json([false, "server error"]);
     }
 })
@@ -135,19 +130,20 @@ UsersTestRouter.patch("/start_test/:testId/:usersId", async (req, res) => {
         const { testId, usersId } = req.params;
         if (ID_PATTERN.test(usersId))
         {
-            if (await UsersTest.exists({ userId: usersId, linkedTest: testId, endTime : {$gt : Date.now()} })) {
+            if (await UsersTest.exists({ userId: usersId, linkedTest: testId})) {
                 if (await Test.exists({ _id: testId, active: true })) {
                     const test = await Test.findOne({ _id: testId });
                     if (await UsersTest.exists({ userId: usersId, linkedTest: testId, endTime: null })) {
-                        const _id = (await UsersTest.findOneAndUpdate({ userId: usersId, linkedTest: testId, endTime: { $gt: Date.now() } }, { startTime: Date.now(), endTime: (Date.now() + (1000 * 60 * test.duration)) }))._id;
-                        res.json([true,await UsersTest.findById(_id)]);
+                        (await UsersTest.findOneAndUpdate({ userId: usersId, linkedTest: testId }, { startTime: Date.now(), endTime: (Date.now() + (1000 * 60 * test.duration)) }));
                     }
-                    else {
-                        const _id = (await UsersTest.findOne({ userId: usersId, linkedTest: testId, endTime: { $gt: Date.now() } }))._id;
-                        const userTest = await UsersTest.findById(_id);
-                        const questions = [];
-                        res.json([true,await UsersTest.findById(_id)]);
+                    const userTest = await UsersTest.findOne({ userId: usersId, linkedTest: testId });
+                    let objectToReturn = { ...userTest._doc };
+                    for (let i = 0; i < objectToReturn.questions.length; i++){
+                        objectToReturn.questions[i] = { ...(await Question.findById(objectToReturn.questions[i].linkedQuestion))._doc,checked : objectToReturn.questions[i].answers};
                     }
+                    objectToReturn["title"] = (await Test.findById(userTest.linkedTest)).title;
+
+                    res.json([true, objectToReturn]);
                 }
                 else res.json([false,"test close or not exist"])
             }
@@ -155,30 +151,38 @@ UsersTestRouter.patch("/start_test/:testId/:usersId", async (req, res) => {
         }
         else res.json([false,"false user id"])
     } catch (error) {
-        console.log(error);
         res.json([false, "server error"]);
     }
 });
 
-UsersTestRouter.patch("/end_test/:testId/:usersId", async (req, res) => {
+UsersTestRouter.patch("/end_test/:userTestId", async (req, res) => {
     try {
-        const { testId, usersId } = req.params;
-        if (ID_PATTERN.test(usersId))
-        {
-            if (await UsersTest.exists({ userId: usersId, linkedTest: testId, endTime : {$gt : Date.now()}  })) {
-                if (await Test.exists({ _id: testId, active: true })) {
-                    const test = await Test.findOne({ _id: testId });
-                    await UsersTest.findOneAndUpdate({ userId: usersId, linkedTest: testId }, {endTime : Date.now()});
+        const {userTestId } = req.params;
+            if (await UsersTest.exists({_id : userTestId  })) {
+                    await UsersTest.findOneAndUpdate({ _id : userTestId }, {endTime : Date.now()});
                     res.json([true,"the test end"]);
-                }
-                else res.json([false,"test close or not exist"])
             }
-            else res.json([false,"test not found"])
-        }
-        else res.json([false,"false user id"])
+            else res.json([false,"test close or not exist"])
     } catch (error) {
         res.json([false, "server error"]);
     }
 });
 
+UsersTestRouter.patch("/update_answear/:userTestId/:questionId", async (req, res) => {
+    try {
+        const { userTestId, questionId } = req.params;
+        const { answers } = req.body;
+        if (await Question.exists({ _id: questionId })) {
+            if (await UsersTest.exists({ _id: userTestId})) {
+                const obj = (await UsersTest.findOne({ _id: userTestId })).questions;
+                obj.forEach(val => val.linkedQuestion.toString() === questionId ? val.answers = answers : undefined);
+                await UsersTest.findByIdAndUpdate(userTestId, { questions: obj });
+                res.json([true, "success"]);
+            }
+            else res.json([false,"user not assign to this test"])
+        } else res.json([false, "question not found"]);
+    } catch (error) {
+        res.json([false, "server error"]);
+    }
+})
 export default UsersTestRouter;
