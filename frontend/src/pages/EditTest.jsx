@@ -26,11 +26,93 @@ import ServerAddress from "../assets/ServerAddress";
 import imagePlaceholder from "../assets/imagePlaceholder.jpg";
 import { SnackbarContext } from "../App";
 import TestSettings from "../components/TestSettings";
+import QuestionBank from "../components/QuestionBank";
+import Examinees from "../components/Examinees";
 
 function EditTest() {
   const [stage, setStage] = useState(useQuery().get("stg") | 0);
   const [testId, setTestId] = useState(useQuery().get("id") || null);
+  const [questionList, setQuestionsList] = useState([]);
+  const [testData, setTestData] = useState(null);
+  const { password, userId } = useParams();
+  const { openBackdrop, closeBackdrop } = useContext(SnackbarContext);
 
+  const fatchData = async () => {
+    const res = await axios.get(
+      ServerAddress(`test/get_test_info/${userId}/${password}/${testId}`)
+    );
+    if (res.data[0]) {
+      setTestData(res.data[1]);
+      closeBackdrop();
+    }
+  };
+  useEffect(() => {
+    if (testId !== null) {
+      openBackdrop();
+      fatchQuestionsList();
+      fatchData();
+    }
+  }, []);
+
+  const newGroup = async (groupName) => {
+    const res = await axios.patch(
+      ServerAddress(
+        `test/add_group/${userId}/${password}/${testId}/${groupName}`
+      )
+    );
+    if (res.data[0]) {
+      openBackdrop();
+      await fatchData();
+      closeBackdrop();
+    }
+  };
+
+  const fatchQuestionsList = async () => {
+    const res = await axios.get(
+      ServerAddress(
+        `question/get_linkes_questions/${userId}/${password}/${testId}`
+      )
+    );
+    if (res.data[0]) {
+      setQuestionsList(res.data[1]);
+    }
+  };
+  /**
+   * The function update an existing question or create new when not _id supplide
+   * @param {String} _id the id of the question to update
+   * @param {Object} body
+   */
+  const handleQuestionSubmit = async (_id, body) => {
+    const res = await (_id
+      ? axios.patch(
+          ServerAddress(
+            `question/edit_questions/${userId}/${password}/${testId}/${_id}`
+          ),
+          body
+        )
+      : axios.post(
+          ServerAddress(
+            `question/new_questions/${userId}/${password}/${testId}`
+          ),
+          body
+        ));
+    if (res.data[0]) {
+      openBackdrop();
+      await fatchQuestionsList();
+      closeBackdrop();
+    }
+  };
+
+  const deleteQuestion = async (_id) => {
+    const res = await axios.delete(
+      ServerAddress(`question/delete/${userId}/${password}/${testId}/${_id}`)
+    );
+    if (res.data[0]) {
+      openBackdrop();
+      await fatchQuestionsList();
+      closeBackdrop();
+    }
+  };
   return (
     <DefaultBackground>
       <Stack position="fixed" width="100vw" padding="20px">
@@ -51,13 +133,39 @@ function EditTest() {
         </Stepper>
         <Container>
           <Collapse in={stage === 0}>
-            <TestSettings testId={testId} nextPage={(e) => setStage(1)} />
+            {testId && testData === null ? undefined : (
+              <TestSettings
+                data={testData}
+                testId={testId}
+                nextPage={(e) => setStage(1)}
+              />
+            )}
           </Collapse>
           <Collapse in={stage === 1}>
-            <QuestionBank testId={testId} nextPage={(e) => setStage(2)} />
+            {testId && testData === null ? undefined : (
+              <QuestionBank
+                data={questionList}
+                testId={testId}
+                numberOfQuestionsRequired={
+                  testData ? testData.numOfQuestions : 0
+                }
+                submitQuestion={handleQuestionSubmit}
+                deleteQuestion={deleteQuestion}
+                nextPage={(e) => setStage(2)}
+              />
+            )}
           </Collapse>
           <Collapse in={stage === 2}>
-            <Examinees testId={testId} nextPage={(e) => setStage(2)} />
+            {testId && testData === null ? undefined : (
+              <Examinees
+                testId={testId}
+                groups={testData ? testData.groups : []}
+                addGroup={newGroup}
+                nextPage={(e) =>
+                  (window.location.href = `/accounts/dashboard/${userId}/${password}`)
+                }
+              />
+            )}
           </Collapse>
         </Container>
       </Stack>
@@ -65,63 +173,7 @@ function EditTest() {
   );
 }
 
-const QuestionBank = ({ nextPage }) => {
-  return (
-    <React.Fragment>
-      <Stack
-        component={Container}
-        gap={2}
-        margin={"10px auto"}
-        direction="row"
-        justifyContent="space-between"
-        divider={<Divider orientation="vertical" flexItem />}
-      >
-        <Stack gap={10}>
-          <Box>
-            <Typography variant="h1">34</Typography>
-            <Typography variant="body" align="center">
-              מספר שאלות
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="h1">34</Typography>
-            <Typography variant="body" align="center">
-              מספר שאלות
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="h1">34</Typography>
-            <Typography variant="body" align="center">
-              מספר שאלות
-            </Typography>
-          </Box>
-        </Stack>
-        <Stack>
-          <Typography variant="h3">
-            תפריט שאלות
-            <Divider />
-          </Typography>
-        </Stack>
-        <QuestionEdit />
-      </Stack>
-      <Button
-        sx={{
-          position: "fixed",
-          left: "50%",
-          bottom: "3%",
-          transform: "translateX(-50%)",
-        }}
-        onClick={(e) => {
-          nextPage();
-        }}
-        variant="contained"
-      >
-        המשך
-      </Button>
-    </React.Fragment>
-  );
-};
-
+/**
 const Examinees = () => {
   return (
     <Container>
@@ -150,5 +202,5 @@ const Examinees = () => {
     </Container>
   );
 };
-
+*/
 export default EditTest;

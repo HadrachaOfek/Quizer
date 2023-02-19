@@ -316,5 +316,24 @@ TestRouter.get('/get_test_info/:ownerId/:ownerPassword/:testId', async (req, res
 	}
 });
 
+TestRouter.patch("/add_group/:ownerId/:ownerPassword/:testId/:groupName", async (req, res) => {
+	try{
+		const { ownerId, ownerPassword,testId ,groupName} = req.params;
+		//checks if the user exists 
+		if (await Users.exists({ userId: ownerId, password: ownerPassword })) {
+			if (await Test.exists({ $or: [{ coOwner: ownerId, _id: testId }, { owner: ownerId, _id: testId }] })) {
+				if (!(await Test.exists({ _id: testId, groups: groupName }))) {
+					await Test.findByIdAndUpdate(testId, { $push: { groups: groupName } });
+				}
+				res.json([true, "success"]);
+			} else res.json([false,"user not allowd"])
+		}
+		else res.json([false,"User not exists"]);
+	}
+	catch(e)
+	{
+		res.json([false,"Server Error"]);
+	}
+})
 
 export default TestRouter;

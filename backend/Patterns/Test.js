@@ -12,6 +12,7 @@ const TestSchema = new Schema({
 	createAt : {type : Date,default : Date.now()},
 	passingGrade : {type : Number , default : 60},
 	numOfQuestions: { type: Number, require: true },
+	groups : {type : Array , default : []}
 });
 
 const Test = pkg.model('Test', TestSchema);

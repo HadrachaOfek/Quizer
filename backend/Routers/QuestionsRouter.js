@@ -67,7 +67,7 @@ QuestionRouter.patch('/edit_questions/:userId/:userPassword/:testid/:questionid'
  * when we want to delete a question
  * we'll call "question/delete/<admin id>/password/<test id>/<question id>"
  */
-QuestionRouter.patch('/delete/:id/:password/:testId/:questionid', async (req, res) => {
+QuestionRouter.delete('/delete/:id/:password/:testId/:questionid', async (req, res) => {
 	try{
 		const { id, password, testid, questionid,testId } = req.params;
 		if (await Users.exists({ userId: id, password: password })) {
@@ -92,10 +92,15 @@ QuestionRouter.patch('/delete/:id/:password/:testId/:questionid', async (req, re
  * we'll call "question/get_linkes_questions/<test id>"
  * and we'll provide the test id
  */
-QuestionRouter.get('/get_linkes_questions/:testid', async (req, res) => {
+QuestionRouter.get('/get_linkes_questions/:userId/:password/:testId', async (req, res) => {
 	try {
-		if (await Test.exists({ _id: req.params.testid })) {
-			res.json([true,await Question.find({ linkedTest: req.params.testid })]);
+		const { testId, userId, password } = req.params;
+		if (await Test.exists({ _id: testId })) {
+			if (await Users.exists({ userId: userId, password: password }))
+				if (await Test.exists({ $or: [{ owner: userId, _id: testId }, { coOwner: userId, _id: testId }] }))
+					res.json([true, await Question.find({ linkedTest: testId })]);
+				else res.json([false, "User not allowd"]);
+			else res.json([false, "User not exists"]);
 		} else {
 			res.send([false,"Test not exists"]);
 		}

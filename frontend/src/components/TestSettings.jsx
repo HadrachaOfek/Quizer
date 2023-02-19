@@ -26,20 +26,24 @@ import ServerAddress from "../assets/ServerAddress";
 import imagePlaceholder from "../assets/imagePlaceholder.jpg";
 import { SnackbarContext } from "../App";
 
-const TestSettings = ({ nextPage, testId }) => {
+const TestSettings = ({ nextPage, testId, data }) => {
   const { openBackdrop, closeBackdrop } = useContext(SnackbarContext);
   const [refresh, setRefresh] = useState(true);
   const [coOwnerList, setCoOwnerList] = useState(new Set());
-  const [title, setTitle] = useState("");
-  const [instructions, setinstructions] = useState("");
-  const [logo, setLogo] = useState("");
-  const [duration, setDuration] = useState(60);
-  const [passingGrade, setPassingGrade] = useState(60);
-  const [numOfQuestions, setNumOfQuestions] = useState(0);
+  const [title, setTitle] = useState(data !== null ? data.title : "");
+  const [instructions, setinstructions] = useState(
+    data !== null ? data.instructions : ""
+  );
+  const [logo, setLogo] = useState(data !== null ? data.logo : "");
+  const [duration, setDuration] = useState(data !== null ? data.duration : 60);
+  const [passingGrade, setPassingGrade] = useState(
+    data !== null ? data.passingGrade : 60
+  );
+  const [numOfQuestions, setNumOfQuestions] = useState(
+    data !== null ? data.numOfQuestions : 0
+  );
   const { password, userId } = useParams();
-
   const [isValid, setIsValid] = useState(false);
-
   useEffect(() => {
     setIsValid(
       title.trim() !== "" &&
@@ -98,31 +102,6 @@ const TestSettings = ({ nextPage, testId }) => {
       }
     }
   };
-
-  /**
-   * This function handle to fatch the test data if the user edit an existing test
-   */
-  useEffect((e) => {
-    const fatchData = async () => {
-      const res = await axios.get(
-        ServerAddress(`test/get_test_info/${userId}/${password}/${testId}`)
-      );
-      if (res.data[0]) {
-        console.log(res.data[1]);
-        setTitle(res.data[1].title);
-        setLogo(res.data[1].logo);
-        setDuration(res.data[1].duration);
-        setNumOfQuestions(res.data[1].numOfQuestions);
-        setPassingGrade(res.data[1].passingGrade);
-        setinstructions(res.data[1].instructions);
-        closeBackdrop();
-      }
-    };
-    if (testId !== null) {
-      openBackdrop();
-      fatchData();
-    }
-  }, []);
 
   const fileReader = new FileReader();
 

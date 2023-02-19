@@ -55,6 +55,7 @@ function AccountGate() {
             <TextField
               label="סיסמה"
               helperText=" "
+              type="password"
               error={
                 userPassword !== "" && !userPassword.match("[\\dA-Za-z]{8}")
               }
