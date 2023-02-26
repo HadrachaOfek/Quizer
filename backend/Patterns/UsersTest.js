@@ -11,7 +11,8 @@ const UsersTestSchema = new Schema({
     endTime : {type : Date , default : null},
     questions: { type: Array, default: [] },
     answers : {type : Array , default : []},
-    grade: {type : Number,default : null},
+    grade: { type: Number, default: null },
+    group : {type : String, require : true},
 });
 
 const UsersTest = pkg.model('UsersTest', UsersTestSchema);

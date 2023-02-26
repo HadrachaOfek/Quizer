@@ -148,16 +148,18 @@ function QuestionEdit({ submitQuestion, data, testId, deleteQuestion }) {
         SHA256(answers[element]).toString()
       ),
     });
-    setFile(null);
-    setQuestion("");
-    setAnswers([]);
-    setCorrectAnswer([]);
-    grade(0);
+    if (!data) {
+      setFile(null);
+      setQuestion("");
+      setAnswers([]);
+      setCorrectAnswer([]);
+      grade(0);
+    }
   };
 
   return (
     <Stack
-      id={data ? data._id : 0}
+      id={data ? data._id : "new-question-card"}
       component={Paper}
       variant="outlined"
       sx={{

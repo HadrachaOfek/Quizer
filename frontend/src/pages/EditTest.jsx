@@ -35,7 +35,25 @@ function EditTest() {
   const [questionList, setQuestionsList] = useState([]);
   const [testData, setTestData] = useState(null);
   const { password, userId } = useParams();
-  const { openBackdrop, closeBackdrop } = useContext(SnackbarContext);
+  const { openBackdrop, popAlert, closeBackdrop, closeModal } =
+    useContext(SnackbarContext);
+  const [isTestValid, setIsTestValid] = useState(false);
+
+  useEffect(() => {
+    if (testId !== null) {
+      openBackdrop();
+      fatchQuestionsList();
+      fatchData();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (testData && questionList) {
+      setIsTestValid(
+        testData.numOfQuestions <= questionList.filter((e) => e.active).length
+      );
+    }
+  }, [questionList, testData]);
 
   const fatchData = async () => {
     const res = await axios.get(
@@ -46,13 +64,6 @@ function EditTest() {
       closeBackdrop();
     }
   };
-  useEffect(() => {
-    if (testId !== null) {
-      openBackdrop();
-      fatchQuestionsList();
-      fatchData();
-    }
-  }, []);
 
   const newGroup = async (groupName) => {
     const res = await axios.patch(
@@ -64,6 +75,20 @@ function EditTest() {
       openBackdrop();
       await fatchData();
       closeBackdrop();
+    }
+  };
+
+  const deleteGroup = async (groupName) => {
+    const res = await axios.patch(
+      ServerAddress(
+        `test/delete_group/${userId}/${password}/${testId}/${groupName}`
+      )
+    );
+    console.log(res.data);
+    if (res.data[0]) {
+      openBackdrop();
+      await fatchData();
+      closeModal();
     }
   };
 
@@ -96,6 +121,7 @@ function EditTest() {
           ),
           body
         ));
+    console.log(res.data[0]);
     if (res.data[0]) {
       openBackdrop();
       await fatchQuestionsList();
@@ -151,16 +177,23 @@ function EditTest() {
                 }
                 submitQuestion={handleQuestionSubmit}
                 deleteQuestion={deleteQuestion}
-                nextPage={(e) => setStage(2)}
+                isTestValid={isTestValid}
+                nextPage={(e) =>
+                  isTestValid
+                    ? setStage(2)
+                    : (window.location.href = `/accounts/dashboard/${userId}/${password}`)
+                }
               />
             )}
           </Collapse>
           <Collapse in={stage === 2}>
             {testId && testData === null ? undefined : (
               <Examinees
+                isTestValid={isTestValid}
                 testId={testId}
                 groups={testData ? testData.groups : []}
                 addGroup={newGroup}
+                deleteGroup={deleteGroup}
                 nextPage={(e) =>
                   (window.location.href = `/accounts/dashboard/${userId}/${password}`)
                 }

@@ -11,6 +11,7 @@ import {
   Collapse,
   Box,
   Button,
+  Tooltip,
 } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import React, { useContext, useEffect } from "react";
@@ -28,6 +29,7 @@ import { SnackbarContext } from "../App";
 import TestSettings from "../components/TestSettings";
 
 function QuestionBank({
+  isTestValid,
   deleteQuestion,
   testId,
   nextPage,
@@ -86,6 +88,18 @@ function QuestionBank({
               </Typography>
             </Button>
           ))}
+          <Button
+            variant="outlined"
+            onClick={(_) =>
+              document
+                .getElementById("new-question-card")
+                .scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            <Typography variant="body1" width="100%" align="right">
+              {"שאלה חדשה"}
+            </Typography>
+          </Button>
         </Stack>
         <Stack
           height={"70vh"}
@@ -96,11 +110,6 @@ function QuestionBank({
           sx={{ overflowY: "scroll" }}
           padding="0px 0px 0px 20px"
         >
-          <QuestionEdit
-            submitQuestion={submitQuestion}
-            deleteQuestion={deleteQuestion}
-            testId={testId}
-          />
           {data.map((element) => (
             <QuestionEdit
               deleteQuestion={deleteQuestion}
@@ -110,22 +119,35 @@ function QuestionBank({
               testId={testId}
             />
           ))}
+          <QuestionEdit
+            submitQuestion={submitQuestion}
+            deleteQuestion={deleteQuestion}
+            testId={testId}
+          />
         </Stack>
       </Stack>
-      <Button
-        sx={{
-          position: "fixed",
-          left: "50%",
-          bottom: "3%",
-          transform: "translateX(-50%)",
-        }}
-        onClick={(e) => {
-          nextPage();
-        }}
-        variant="contained"
+      <Tooltip
+        title={
+          isTestValid
+            ? "המשך להרשאות"
+            : "יש לשים לב שמספר השאלות תואם למספר שהוגדר"
+        }
       >
-        המשך
-      </Button>
+        <Button
+          sx={{
+            position: "fixed",
+            left: "50%",
+            bottom: "3%",
+            transform: "translateX(-50%)",
+          }}
+          onClick={(e) => {
+            nextPage();
+          }}
+          variant="contained"
+        >
+          {isTestValid ? "המשך" : "סיים"}
+        </Button>
+      </Tooltip>
     </React.Fragment>
   );
 }

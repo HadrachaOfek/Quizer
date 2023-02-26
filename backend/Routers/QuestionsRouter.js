@@ -50,8 +50,8 @@ QuestionRouter.patch('/edit_questions/:userId/:userPassword/:testid/:questionid'
 						...req.body,
 						linkedTest: testid,
 					})
-					res.json([true, question._id]);
-				} res.json([false, "Question not found"]);
+					res.json([true, questionid]);
+				}else res.json([false, "Question not found"]);
 			}
 			else res.json([false,"Test not exists or the user isn't associate"]);
 		}

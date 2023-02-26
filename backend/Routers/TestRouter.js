@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { ADMIN } from '../ENV.js';
 import Test from '../Patterns/Test.js';
 import Users from '../Patterns/Users.js';
+import UsersTest from '../Patterns/UsersTest.js';
 import Question from '../Patterns/Question.js';
 
 const TestRouter = Router();
@@ -288,9 +289,11 @@ TestRouter.get('/get_all/:ownerId/:ownerPassword', async (req, res) => {
 		if (await Users.exists({ userId: ownerId, password: ownerPassword })) {
 			const tests = await Test.find({ $or: [{ coOwner: ownerId }, { owner: ownerId }] });
 			const toReturn = [];
-			tests.forEach(test => {
-				toReturn.push({_id : test._id,title : test.title,active : activeTestsIdToPassword.has(test._id)})
-			})
+			for (const test of tests){
+				let num = await UsersTest.countDocuments({ linkedTest: test._id }).exec()
+				toReturn.push({ _id: test._id, title: test.title, active: activeTestsIdToPassword.has(test._id),numOfExaminee : num });
+			}
+			console.log(toReturn);
 			res.json([true,toReturn]);
 		}
 		else res.json([false,"User not exists"]);
@@ -324,6 +327,27 @@ TestRouter.patch("/add_group/:ownerId/:ownerPassword/:testId/:groupName", async 
 			if (await Test.exists({ $or: [{ coOwner: ownerId, _id: testId }, { owner: ownerId, _id: testId }] })) {
 				if (!(await Test.exists({ _id: testId, groups: groupName }))) {
 					await Test.findByIdAndUpdate(testId, { $push: { groups: groupName } });
+				}
+				res.json([true, "success"]);
+			} else res.json([false,"user not allowd"])
+		}
+		else res.json([false,"User not exists"]);
+	}
+	catch(e)
+	{
+		res.json([false,"Server Error"]);
+	}
+})
+
+TestRouter.patch("/delete_group/:ownerId/:ownerPassword/:testId/:groupName", async (req, res) => {
+	try{
+		const { ownerId, ownerPassword,testId ,groupName} = req.params;
+		//checks if the user exists 
+		if (await Users.exists({ userId: ownerId, password: ownerPassword })) {
+			if (await Test.exists({ $or: [{ coOwner: ownerId, _id: testId }, { owner: ownerId, _id: testId }] })) {
+				if ((await Test.exists({ _id: testId, groups: groupName }))) {
+					await UsersTest.deleteMany({linkedTest : testId,group : groupName})
+					await Test.findByIdAndUpdate(testId, { $pull: { groups: groupName } });
 				}
 				res.json([true, "success"]);
 			} else res.json([false,"user not allowd"])

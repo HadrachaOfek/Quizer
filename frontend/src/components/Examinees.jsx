@@ -1,10 +1,26 @@
-import { Button, Typography } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardActionArea,
+  CardContent,
+  Typography,
+} from "@mui/material";
 import { Stack } from "@mui/system";
 import React, { useContext } from "react";
+import { useParams } from "react-router-dom";
 import { SnackbarContext } from "../App";
 import CreateNewGroup from "./CreateNewGroup";
+import GroupEdit from "./GroupEdit";
 
-function Examinees({ testId, nextPage, groups, addGroup }) {
+function Examinees({
+  testId,
+  nextPage,
+  groups,
+  addGroup,
+  deleteGroup,
+  isTestValid,
+}) {
+  const { password, userId } = useParams();
   const { popModal, closeModal } = useContext(SnackbarContext);
 
   const newGroup = (name) => {
@@ -15,13 +31,35 @@ function Examinees({ testId, nextPage, groups, addGroup }) {
     <div>
       <Stack direction="row" order="5" justifyContent="space-evenly">
         {groups.map((group, index) => (
-          <Button variant="outlined" key={index}>
-            {group}
-          </Button>
+          <Card variant="outlined">
+            <CardActionArea
+              onClick={(e) =>
+                popModal(
+                  <GroupEdit
+                    close={closeModal}
+                    userId={userId}
+                    password={password}
+                    testId={testId}
+                    groupName={group}
+                    deleteGroup={deleteGroup}
+                  />
+                )
+              }
+            >
+              <CardContent>
+                <Typography variant="h3" align="center">
+                  {group}
+                </Typography>
+                <Typography variant="body">סה"כ ס רשומים בקורס</Typography>
+              </CardContent>
+            </CardActionArea>
+          </Card>
         ))}
       </Stack>
       <Button
-        onClick={(e) => popModal(<CreateNewGroup newGroup={newGroup} />)}
+        onClick={(e) =>
+          popModal(<CreateNewGroup testId={testId} newGroup={newGroup} />)
+        }
         sx={{ margin: " 10px auto", display: "block" }}
         variant="contained"
       >

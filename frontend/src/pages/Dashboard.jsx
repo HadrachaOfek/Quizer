@@ -37,6 +37,7 @@ function Dashboard() {
       if (res.data[0]) {
         setTestList(res.data[1]);
       }
+      console.log(res.data);
     };
 
     getData();

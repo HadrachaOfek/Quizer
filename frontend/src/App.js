@@ -48,15 +48,6 @@ function App() {
 	return (
 		<React.Fragment>
 			<ThemeProvider theme={theme}>
-				<Modal
-					open={isModalOpen}
-					onClose={e => setIsModalOpen(false)}>
-					<React.Fragment>
-					{
-						modalChild
-					}
-					</React.Fragment>
-				</Modal>
 				<Snackbar open={isSnackOpen} anchorOrigin={{vertical : 'bottom',horizontal : 'center'}} onClose={e => setIsSnackOpen(false)} autoHide={5000}>
 					<Alert severity={snackSeverity}>{ SnackMessege}</Alert>
 				</Snackbar>
@@ -73,6 +64,15 @@ function App() {
 						</Routes>
 						</ThemeProvider>
 						<ThemeProvider theme={PurpleTheme}>
+				<Modal
+					open={isModalOpen}
+					onClose={e => setIsModalOpen(false)}>
+					<React.Fragment>
+					{
+						modalChild
+					}
+					</React.Fragment>
+				</Modal>
 							<Routes>
 								<Route path='/accounts/gate' element={<AccountGate/>}/>
 								<Route path='/accounts/registration' element={<Registration />} />

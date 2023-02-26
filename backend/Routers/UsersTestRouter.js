@@ -31,14 +31,14 @@ UsersTestRouter.get("/is_not_tested/:passcode/:userId", async (req, res) => {
     }
 })
 
-UsersTestRouter.patch("/build_pesonal_quiz/:adminId/:adminPassword/:testId", async (req, res) => {
+UsersTestRouter.post("/build_pesonal_quiz/:adminId/:adminPassword/:testId", async (req, res) => {
     try {
         const { adminId,adminPassword,testId } = req.params;
-        const { userId, firstName, lastName } = req.body;
+        const { userId, firstName, lastName,group } = req.body;
         if (ID_PATTERN.test(userId) && ID_PATTERN.test(adminId))
         {
             if (await Users.exists({ userId: adminId, password: adminPassword })) {
-                if (await Test.exists({ _id: testId, admin: adminId })) {
+                if (await Test.exists({$or : [{ _id: testId, coOwner: adminId },{ _id: testId, owner: adminId }]})) {
                     const test = await Test.findById(testId);
                     if (!(await UsersTest.exists({ userId: userId, linkedTest: testId }))) {
                         const questions = await Question.find({ linkedTest: testId, active: true })
@@ -54,6 +54,7 @@ UsersTestRouter.patch("/build_pesonal_quiz/:adminId/:adminPassword/:testId", asy
                             firstName: firstName,
                             lastName: lastName,
                             userId: userId,
+                            group: group,
                             questions: userQuestions,
                         });
                         await toSend.save();
@@ -70,13 +71,36 @@ UsersTestRouter.patch("/build_pesonal_quiz/:adminId/:adminPassword/:testId", asy
     }
 })
 
-UsersTestRouter.get("/get_all_examinees/:adminId/:adminPassword/:testId", async (req, res) => {
+UsersTestRouter.patch("/delete_examinee/:adminId/:adminPassword/:testId/:ExamineeId", async (req, res) => {
     try {
-        const { adminId, adminPassword, testId } = req.params;
+        const { adminId,adminPassword,testId,ExamineeId } = req.params;
+        if (ID_PATTERN.test(ExamineeId) && ID_PATTERN.test(adminId))
+        {
+            if (await Users.exists({ userId: adminId, password: adminPassword })) {
+                if (await Test.exists({$or : [{ _id: testId, coOwner: adminId },{ _id: testId, owner: adminId }]})) {
+                    if ((await UsersTest.exists({ userId: ExamineeId, linkedTest: testId }))) {
+                        const group = (await UsersTest.findOne({ userId: ExamineeId, linkedTest: testId })).group;
+                        await UsersTest.deleteOne({ userId: ExamineeId, linkedTest: testId })
+                        res.json([true, await UsersTest.find({group : group}, { firstName: true, lastName: true, userId: true, _id: true, endTime : true })]);
+                    }
+                    else res.json([false, "this user already assign the test"])
+                }
+                else res.json([false, "test not found or not active"]);
+            } else res.json([false, "user not found"]);
+        }
+        else res.json([false,"false user id"])
+    } catch (e) {
+        res.json([false, "server error"]);
+    }
+})
+
+UsersTestRouter.get("/get_all_examinees/:adminId/:adminPassword/:testId/:group", async (req, res) => {
+    try {
+        const { adminId, adminPassword, testId,group } = req.params;
         if (ID_PATTERN.test(adminId)) {
             if (await Users.exists({ userId: adminId, password: adminPassword })) {
-                if (await Test.exists({ _id: testId, admin: adminId })) {
-                    const respone = await UsersTest.find({}, { firstName: true, lastName: true, userId: true, _id: true, endTime : true });
+                if (await Test.exists({$or : [{ _id: testId, coOwner: adminId },{ _id: testId, owner: adminId }]})) {
+                    const respone = await UsersTest.find({group : group}, { firstName: true, lastName: true, userId: true, _id: true, endTime : true });
                     res.json([true, respone]);
                 } else res.json([false, "this user isn't admin of the given test"]);
             } else res.json([false,"no such admin"])
@@ -86,6 +110,7 @@ UsersTestRouter.get("/get_all_examinees/:adminId/:adminPassword/:testId", async 
     } catch (error) {
         res.json([false, "server failed"]);
     }
+    
 })
 
 UsersTestRouter.get("/get_all_possible_examinees/:adminId/:adminPassword",async (req, res) => {
