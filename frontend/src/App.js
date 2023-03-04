@@ -1,10 +1,17 @@
 import logo from './logo.svg';
-import {deepmerge} from '@mui/utils'
+import { deepmerge } from '@mui/utils';
 import './App.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import React, { createContext, useEffect, useState } from 'react';
 import { createTheme, makeStyles, recomposeColor } from '@mui/material/styles';
-import { Alert, Backdrop, CircularProgress, Modal, responsiveFontSizes, Snackbar } from '@mui/material';
+import {
+	Alert,
+	Backdrop,
+	CircularProgress,
+	Modal,
+	responsiveFontSizes,
+	Snackbar,
+} from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import '@fontsource/assistant';
 import BlueBackground from './components/BlueBackground';
@@ -17,72 +24,115 @@ import Registration from './pages/Registration';
 import Dashboard from './pages/Dashboard';
 import EditTest from './pages/EditTest';
 import loadingLogo from './assets/loadingLogo.gif';
+import InstructionsPage from './pages/InstructionsPage';
+import ExamPage from './pages/ExamPage';
 export const SnackbarContext = createContext(null);
 
 function App() {
-	const userId = sessionStorage.getItem("userId");
-	const password = sessionStorage.getItem("password");
+	const userId = sessionStorage.getItem('userId');
+	const password = sessionStorage.getItem('password');
 	const isValid = userId !== null && password != null;
 	const [isSnackOpen, setIsSnackOpen] = useState(false);
-	const [SnackMessege, setSnackMessege] = useState("");
-	const [snackSeverity, setSnackSeverity] = useState('error')
+	const [SnackMessege, setSnackMessege] = useState('');
+	const [snackSeverity, setSnackSeverity] = useState('error');
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [modalChild, setModalChild] = useState("");
+	const [modalChild, setModalChild] = useState('');
 	const popAlert = (severity, messege) => {
 		setSnackSeverity(severity);
 		setSnackMessege(messege);
 		setIsSnackOpen(true);
-	}
+	};
 
-	const popModal = (child) => {
+	const popModal = child => {
 		setModalChild(child);
 		setIsModalOpen(true);
-	}
+	};
 
 	const [isBackdrop, setIsBackdrop] = useState(false);
 	const openBackdrop = () => setIsBackdrop(true);
 	const closeBackdrop = () => setIsBackdrop(false);
 	const closeModal = () => setIsModalOpen(false);
 
-
 	return (
 		<React.Fragment>
 			<ThemeProvider theme={theme}>
-				<Snackbar open={isSnackOpen} anchorOrigin={{vertical : 'bottom',horizontal : 'center'}} onClose={e => setIsSnackOpen(false)} autoHide={5000}>
-					<Alert severity={snackSeverity}>{ SnackMessege}</Alert>
+				<Snackbar
+					open={isSnackOpen}
+					anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+					onClose={e => setIsSnackOpen(false)}
+					autoHide={5000}>
+					<Alert severity={snackSeverity}>{SnackMessege}</Alert>
 				</Snackbar>
-				<Backdrop open={isBackdrop} sx={{zIndex : 100,background : 'white'}}>
-					<img src={loadingLogo} width="30%" />
+				<Backdrop
+					open={isBackdrop}
+					sx={{ zIndex: 100, background: 'white' }}>
+					<img src={loadingLogo} width='30%' />
 				</Backdrop>
-				<SnackbarContext.Provider value={{ popAlert,openBackdrop,closeBackdrop,popModal,closeModal }}>
-				<BrowserRouter>
+				<SnackbarContext.Provider
+					value={{
+						popAlert,
+						openBackdrop,
+						closeBackdrop,
+						popModal,
+						closeModal,
+					}}>
+					<BrowserRouter>
 						<ThemeProvider theme={BlueTheme}>
-						<Routes>
-								<Route path='/' element={<Navigate to="/exam/gate" />} />
-								<Route path='/exam/gate' element={<ExamGate />} />
-								<Route path='/exam/test_close' element={<BlueBackground><TestClose/></BlueBackground>}/>
-						</Routes>
+							<Routes>
+								<Route
+									path='/'
+									element={<Navigate to='/exam/gate' />}
+								/>
+								<Route
+									path='/exam/gate'
+									element={<ExamGate />}
+								/>
+								<Route
+									path='/exam/instructions/:userId/:testId'
+									element={<InstructionsPage />}
+								/>
+								<Route
+									path='/exam/exam_page/:userId/:testId'
+									element={<ExamPage />}
+								/>
+								<Route
+									path='/exam/test_close'
+									element={
+										<BlueBackground>
+											<TestClose />
+										</BlueBackground>
+									}
+								/>
+							</Routes>
 						</ThemeProvider>
 						<ThemeProvider theme={PurpleTheme}>
-				<Modal
-					open={isModalOpen}
-					onClose={e => setIsModalOpen(false)}>
-					<React.Fragment>
-					{
-						modalChild
-					}
-					</React.Fragment>
-				</Modal>
+							<Modal
+								open={isModalOpen}
+								onClose={e => setIsModalOpen(false)}>
+								<React.Fragment>{modalChild}</React.Fragment>
+							</Modal>
 							<Routes>
-								<Route path='/accounts/gate' element={<AccountGate/>}/>
-								<Route path='/accounts/registration' element={<Registration />} />
-								<Route path='/accounts/dashboard/:userId/:password' element={<Dashboard />} />
-								<Route path='/accounts/edit_test/:userId/:password' element={<EditTest />} />
+								<Route
+									path='/accounts/gate'
+									element={<AccountGate />}
+								/>
+								<Route
+									path='/accounts/registration'
+									element={<Registration />}
+								/>
+								<Route
+									path='/accounts/dashboard/:userId/:password'
+									element={<Dashboard />}
+								/>
+								<Route
+									path='/accounts/edit_test/:userId/:password'
+									element={<EditTest />}
+								/>
 							</Routes>
 						</ThemeProvider>
 					</BrowserRouter>
 				</SnackbarContext.Provider>
-				</ThemeProvider>
+			</ThemeProvider>
 		</React.Fragment>
 	);
 }
@@ -108,42 +158,36 @@ let theme = createTheme({
 		MuiCard: {
 			styleOverrides: {
 				root: {
-					borderRadius : '15px'
-				}
-			}
+					borderRadius: '15px',
+				},
+			},
 		},
-    MuiGrid : {
-      styleOverrides:
-      {
-        container : {
-          justifyContent : 'center',
-        }
-      },
-    },
-    MuiTableCell : {
-      defaultProps : 
-      {
-      }
-    }
-		,
+		MuiGrid: {
+			styleOverrides: {
+				container: {
+					justifyContent: 'center',
+				},
+			},
+		},
+		MuiTableCell: {
+			defaultProps: {},
+		},
 		MuiTableCell: {
 			styleOverrides: {
 				root: {
-					textAlign : 'center',
-				}
-			}
-		
-	},
+					textAlign: 'center',
+				},
+			},
+		},
 		MuiFormHelperText: {
 			styleOverrides: {
 				root: {
 					textAlign: 'right',
-          fontSize : '10pt'
+					fontSize: '10pt',
 				},
 			},
 		},
-    MuiButton : {
-		},
+		MuiButton: {},
 	},
 	typography: {
 		fontFamily: 'assistant',
@@ -169,44 +213,50 @@ let theme = createTheme({
 		h6: {
 			fontSize: '20pt',
 			fontWeight: 'bold',
-			textAlign : 'center'
+			textAlign: 'center',
 		},
 		caption: {
 			fontSize: '12pt',
 			width: '100%',
-			textAlign : 'center'
+			textAlign: 'center',
 		},
 	},
 });
 
-const PurpleTheme =responsiveFontSizes(createTheme(deepmerge(theme,{
-	palette: {
-		primary: {
-			main: "#AC73E1",
-			dark: '#7b1fa2',
-			light : '#ba68c8',
-		},
-	}
-})));
+const PurpleTheme = responsiveFontSizes(
+	createTheme(
+		deepmerge(theme, {
+			palette: {
+				primary: {
+					main: '#AC73E1',
+					dark: '#7b1fa2',
+					light: '#ba68c8',
+				},
+			},
+		})
+	)
+);
 
-const BlueTheme = responsiveFontSizes(createTheme(deepmerge(theme,{
-	palette: {
-		primary: {
-			main: "#498ce6",
-		}
-	}
-})));
+const BlueTheme = responsiveFontSizes(
+	createTheme(
+		deepmerge(theme, {
+			palette: {
+				primary: {
+					main: '#498ce6',
+				},
+			},
+		})
+	)
+);
 
 const paperPageStyle = {
-    width: '90vw',
-    height: '90vh',
-    borderRadius: '25px',
+	width: '90vw',
+	height: '90vh',
+	borderRadius: '25px',
 	padding: '25px',
-	margin : '10px auto',
+	margin: '10px auto',
 };
 
-
-export {paperPageStyle}
-
+export { paperPageStyle };
 
 export default App;
