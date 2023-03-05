@@ -37,9 +37,9 @@ function Registration() {
     });
     if (res.data[0]) {
       popAlert("success", "משתמש חדש נרשם, הנכם מועברים");
-      window.location.href = `/dashboard/${SHA256(
+      window.location.href = `/accounts/dashboard/${userId}/${SHA256(
         userPassword
-      ).toString()}/${userId}`;
+      ).toString()}`;
     } else {
       popAlert("error", res.data[1]);
     }

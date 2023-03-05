@@ -6,7 +6,9 @@ function CenterWhiteWindow({ children }) {
     <Paper
       variant="elevation"
       sx={{
-        height: "90%",
+        minHeight: "80vh",
+        //width: "90%",
+        //margin: "10vh auto",
         padding: "10px",
         display: "flex",
         flexDirection: "column",

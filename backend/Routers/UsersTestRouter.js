@@ -88,7 +88,7 @@ UsersTestRouter.post(
 							});
 							const userQuestions = [];
 							questions
-								.sort((a, b) => 1 - Math.random())
+								.sort((a, b) => 1 - Math.random() - 0.5)
 								.slice(0, test.numOfQuestions)
 								.map((element, index) => {
 									userQuestions.push({

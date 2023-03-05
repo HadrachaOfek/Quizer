@@ -126,7 +126,7 @@ function QuestionEdit({ submitQuestion, data, testId, deleteQuestion }) {
     (_) => {
       let temp =
         question.trim() !== "" &&
-        correctAnswer.length !== 0 &&
+        (selectedType === "שאלה פתוחה" || correctAnswer.length !== 0) &&
         grade > 0 &&
         grade < 101;
       answers.forEach((e) => (temp = temp & (e.trim() !== "")));
@@ -240,19 +240,21 @@ function QuestionEdit({ submitQuestion, data, testId, deleteQuestion }) {
           }}
         />
       ))}
-      <Tooltip title="הוספת תשובה">
-        <IconButton
-          sx={{ width: "fit-content", alignSelf: "center" }}
-          onClick={(e) => {
-            if (answers.indexOf("") === -1) {
-              answers.push("");
-            }
-            setRefresh(!refresh);
-          }}
-        >
-          <AddCircleOutlineIcon color="primary" fontSize="large" />
-        </IconButton>
-      </Tooltip>
+      {selectedType !== "שאלה פתוחה" && (
+        <Tooltip title="הוספת תשובה">
+          <IconButton
+            sx={{ width: "fit-content", alignSelf: "center" }}
+            onClick={(e) => {
+              if (answers.indexOf("") === -1) {
+                answers.push("");
+              }
+              setRefresh(!refresh);
+            }}
+          >
+            <AddCircleOutlineIcon color="primary" fontSize="large" />
+          </IconButton>
+        </Tooltip>
+      )}
       <Divider />
       <Stack direction="row" justifyContent="end" alignItems="center">
         <Tooltip title="שמור שאלה">

@@ -409,7 +409,11 @@ TestRouter.get(
 					_id: testId,
 					$or: [{ coOwner: ownerId }, { owner: ownerId }],
 				});
-				res.json([true, tests]);
+				const groupsCount = []
+				for (const group of tests.groups) {
+					groupsCount.push(await UsersTest.countDocuments({ linkedTest: testId, group: group }));
+				}
+				res.json([true, tests,groupsCount]);
 			} else res.json([false, 'User not exists']);
 		} catch (e) {
 			res.json([false, 'Server Error']);

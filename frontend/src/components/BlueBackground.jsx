@@ -9,7 +9,8 @@ function BlueBackground({ children }) {
         sx={{
           display: "flex",
           flexDirection: "column",
-          height: "100vh",
+          minHeight: "100vh",
+          margin: "auto",
           justifyContent: "center",
         }}
       >

@@ -12,18 +12,18 @@ import {
 	responsiveFontSizes,
 	Snackbar,
 } from '@mui/material';
+
 import { ThemeProvider } from '@emotion/react';
 import '@fontsource/assistant';
 import BlueBackground from './components/BlueBackground';
 import TestClose from './pages/TestClose';
 import ExamGate from './pages/ExamGate';
-import { red } from '@mui/material/colors';
-import PurpleBackground from './components/PurpleBackground';
 import AccountGate from './pages/AccountGate';
 import Registration from './pages/Registration';
 import Dashboard from './pages/Dashboard';
 import EditTest from './pages/EditTest';
-import loadingLogo from './assets/loadingLogo.gif';
+import purpleLoadingSymbol from './assets/purple_gif.gif';
+import blueLoadingSymbol from './assets/gif_transperentBg.gif';
 import InstructionsPage from './pages/InstructionsPage';
 import ExamPage from './pages/ExamPage';
 export const SnackbarContext = createContext(null);
@@ -33,6 +33,7 @@ function App() {
 	const password = sessionStorage.getItem('password');
 	const isValid = userId !== null && password != null;
 	const [isSnackOpen, setIsSnackOpen] = useState(false);
+	const [backdropSymbol, setBackdropSymbol] = useState(purpleLoadingSymbol);
 	const [SnackMessege, setSnackMessege] = useState('');
 	const [snackSeverity, setSnackSeverity] = useState('error');
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,7 +50,7 @@ function App() {
 	};
 
 	const [isBackdrop, setIsBackdrop] = useState(false);
-	const openBackdrop = () => setIsBackdrop(true);
+	const openBackdrop = (variant = 'purple') => { setBackdropSymbol(variant === 'purple' ? purpleLoadingSymbol : blueLoadingSymbol); setIsBackdrop(true) };
 	const closeBackdrop = () => setIsBackdrop(false);
 	const closeModal = () => setIsModalOpen(false);
 
@@ -65,8 +66,8 @@ function App() {
 				</Snackbar>
 				<Backdrop
 					open={isBackdrop}
-					sx={{ zIndex: 100, background: 'white' }}>
-					<img src={loadingLogo} width='30%' />
+					sx={{ zIndex: 100, background: 'rgba(255,255,255,0.4)' }}>
+					<img src={backdropSymbol} width='30%' />
 				</Backdrop>
 				<SnackbarContext.Provider
 					value={{

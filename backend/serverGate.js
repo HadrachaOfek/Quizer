@@ -16,14 +16,14 @@ import QuestionRouter from './Routers/QuestionsRouter.js';
 import UsersRouter from './Routers/UsersRouter.js';
 import UsersTestRouter from './Routers/UsersTestRouter.js';
 import { LocalStorage } from 'node-localstorage';
+import UsersTest from './Patterns/UsersTest.js';
 const app = express();
 app.use(cors());
 
 const activeTestsCache = new LocalStorage('./activeTestCache');
-const examineeCache = new LocalStorage('./examineeCache');
 export const activeTests = new Map();
 export const activeTestsIdToPassword = new Map();
-const examineeList = new Set();
+const examineeList = new Map();
 
 const GeneratePasscode = () => {
 	var passcode = '';
@@ -45,23 +45,13 @@ const GeneratePasscode = () => {
 };
 
 export const writeExaminee = (id, firstName, lastName) => {
-	!examineeCache.getItem(id) &&
-		examineeCache.setItem(id, `${firstName}|${lastName}`);
-	examineeList.add({
-		id: id,
-		firstName: firstName,
-		lastName: lastName,
-	});
+	!examineeList.has(id) && examineeList.set(id, {firstName :   firstName,lastName : lastName });
 };
 
-const loadExamineeFromCache = (id, firstName, lastName) => {
-	for (let i = 0; i < examineeCache.length; i++) {
-		let key = examineeCache.key(i);
-		examineeList.add({
-			id: key,
-			firstName: examineeCache.getItem(key).split('|')[0],
-			lastName: examineeCache.getItem(key).split('|')[0],
-		});
+const loadExamineeFromCache = async() => {
+	const examineeListFromServer = await UsersTest.find({});
+	for (const examinee of examineeListFromServer) {
+		!examineeList.has(examinee.userId) && examineeList.set(examinee.userId, {firstName :   examinee.firstName,lastName : examinee.lastName });
 	}
 };
 
@@ -93,7 +83,7 @@ export const isTestActive = key => {
 };
 
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb' }));
+//app.use(express.urlencoded({ limit: '10mb' }));
 pkg.set('strictQuery', false);
 
 const PORT = 2001;
@@ -107,9 +97,9 @@ app.listen(PORT, async () => {
 			activeTests.set(password, testInfo);
 			activeTestsIdToPassword.set(testInfo._id.toString(), password);
 		}
-		loadExamineeFromCache();
 		console.log(dbUrl(USERNAME, PASSWORD));
 		await pkg.connect(dbUrl(USERNAME, PASSWORD));
+		await loadExamineeFromCache();
 		console.log(`Hello I\'m running on port http://localhost:${PORT}/`);
 	} catch (error) {
 		console.log(error);
