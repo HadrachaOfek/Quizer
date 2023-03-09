@@ -22,7 +22,6 @@ function AccountGate() {
 			)
 		);
 		if (res.data[0]) {
-			sessionStorage.setItem('connections', userId + ' ' + userPassword);
 			window.location.href = `/accounts/dashboard/${userId}/${SHA256(
 				userPassword
 			).toString()}`;

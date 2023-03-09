@@ -47,54 +47,68 @@ UsersRouter.get('/connect/:userId/:userPassword', async (req, res) => {
 	if (!isNaN(userId) && (userId.length == 7 || userId.length == 9)) {
 		if (await Users.exists({ userId: userId, password: userPassword }))
 			res.json([true, true]);
-		else res.json([false,"User don't found"]);
+		else res.json([false, "User don't found"]);
 	} else {
-		res.json([false, "Server error"]);
+		res.json([false, 'Server error']);
 	}
 });
 
-UsersRouter.get("/get_hello/:userId/:userPassword", async (req, res) => {
+UsersRouter.get('/get_hello/:userId/:userPassword', async (req, res) => {
 	try {
 		const { userId, userPassword } = req.params;
 		if (!isNaN(userId) && (userId.length == 7 || userId.length == 9)) {
 			if (await Users.exists({ userId: userId, password: userPassword }))
-				res.json([true, await Users.findOne({ userId: userId, password: userPassword },{firstName : 1,lastName : 1})]);
-			else res.json([false,"User don't found"]);
+				res.json([
+					true,
+					await Users.findOne(
+						{ userId: userId, password: userPassword },
+						{ firstName: 1, lastName: 1 }
+					),
+				]);
+			else res.json([false, "User don't found"]);
 		} else {
-			res.json([false, "Server error"]);
+			res.json([false, 'Server error']);
 		}
 	} catch (error) {
-		res.json([false, "Server Error"]);
+		res.json([false, 'Server Error']);
 	}
 });
 
 UsersRouter.get('/get_all/:userid/:password', async (req, res) => {
 	try {
-		if ((new RegExp("[0-9]{7,9}")).test(req.params.userid)) {
-			if (Users.exists({ userId: req.params.userid, password: req.params.password, admin: true })) {
+		if (new RegExp('[0-9]{7,9}').test(req.params.userid)) {
+			if (
+				Users.exists({
+					userId: req.params.userid,
+					password: req.params.password,
+					admin: true,
+				})
+			) {
 				res.send(await Users.find());
-			}
-			else res.send(false);
-		}
-		else res.send(false)
+			} else res.send(false);
+		} else res.send(false);
 	} catch (error) {
 		res.send(false);
 	}
 });
 
-UsersRouter.get('/ids', async (req, res) => {
-	try{
-	const respon = await Users.find();
-	var ids = [];
-	respon.map(user => (ids = ids.concat(user.userId)));
-	res.json(ids);
-	}
-	catch(error) {
-		res.sendStatus(403);
+UsersRouter.get('/ids/:userId/:password', async (req, res) => {
+	try {
+		const { userId, password } = req.params;
+		if (await Users.exists({ userId: userId, password: password })) {
+			const respon = await Users.find(
+				{ userId: { $ne: userId } },
+				{ firstName: true, lastName: true, userId: true }
+			);
+			res.json([true, respon]);
+		} else res.json([false, 'not allowed']);
+	} catch (error) {
+		res.json([false, 'error server']);
 	}
 });
 
-UsersRouter.patch('/set_admin/:adminId/:adminPassword/:userId',
+UsersRouter.patch(
+	'/set_admin/:adminId/:adminPassword/:userId',
 	async (req, res) => {
 		try {
 			const { userId, adminId, adminPassword } = req.params;
@@ -111,38 +125,42 @@ UsersRouter.patch('/set_admin/:adminId/:adminPassword/:userId',
 							{ userId: userId },
 							{ admin: true }
 						);
-						res.json([true, "user deleted"]);
+						res.json([true, 'user deleted']);
 					} else {
-						res.json([false, "user not found"]);
+						res.json([false, 'user not found']);
 					}
-				}
-				else res.json([false, "admin not found"]);
-			} else res.json([false, "invalid ids"]);
+				} else res.json([false, 'admin not found']);
+			} else res.json([false, 'invalid ids']);
 		} catch (e) {
 			res.sendStatus(404);
 		}
 	}
 );
 
-UsersRouter.delete('/delete/:adminId/:adminPassword/:userId', async (req, res) => {
-	try {
-		const { adminId, adminPassword, userId } = req.params;
-		if (ID_PATTERN.test(userId) && ID_PATTERN.test(adminId)) {
-			if (await Users.exists({ admin: true, userId: adminId, password: adminPassword }))
-			{
-				if (await Users.exists({ userId: userId })) {
-					await Users.findOneAndDelete({ userId: userId });
-					res.json([true,"user deleted"])
-				}
-				else res.json([false, "User not found"]);
+UsersRouter.delete(
+	'/delete/:adminId/:adminPassword/:userId',
+	async (req, res) => {
+		try {
+			const { adminId, adminPassword, userId } = req.params;
+			if (ID_PATTERN.test(userId) && ID_PATTERN.test(adminId)) {
+				if (
+					await Users.exists({
+						admin: true,
+						userId: adminId,
+						password: adminPassword,
+					})
+				) {
+					if (await Users.exists({ userId: userId })) {
+						await Users.findOneAndDelete({ userId: userId });
+						res.json([true, 'user deleted']);
+					} else res.json([false, 'User not found']);
+				} else res.json([false, 'Admin not found']);
 			}
-			else res.json([false,"Admin not found"])
+		} catch (error) {
+			res.statusCode(404);
 		}
-	} catch (error) {
-		res.statusCode(404);
 	}
-});
-
+);
 
 UsersRouter.post('/create', async (req, res) => {
 	const { firstName, lastName, userId, password } = req.body;
@@ -189,25 +207,35 @@ UsersRouter.get('/exist/:id/:password', async (req, res) => {
 	);
 });
 
-UsersRouter.patch('/reset_password/:adminId/:adminPassword/:userId/:userPassword', async (req, res) => {
-	const { adminId, adminPassword, userId, userPassword } = req.params;
-	try {
-		if (await Users.exists({ userId: adminId, password: adminPassword, admin: true })) {
-			if (await Users.exists({ userId: userId })) {
-				await Users.findOneAndUpdate({ userId: userId }, { password: userPassword });
-				res.send([true,"User password updated"])
+UsersRouter.patch(
+	'/reset_password/:adminId/:adminPassword/:userId/:userPassword',
+	async (req, res) => {
+		const { adminId, adminPassword, userId, userPassword } = req.params;
+		try {
+			if (
+				await Users.exists({
+					userId: adminId,
+					password: adminPassword,
+					admin: true,
+				})
+			) {
+				if (await Users.exists({ userId: userId })) {
+					await Users.findOneAndUpdate(
+						{ userId: userId },
+						{ password: userPassword }
+					);
+					res.send([true, 'User password updated']);
+				} else {
+					res.json([false, 'User not found']);
+				}
+			} else {
+				res.json([false, 'Admin not found']);
 			}
-			else {
-				res.json([false,"User not found"])
-			}
-		} else {
-			res.json([false,"Admin not found"])
+		} catch (e) {
+			res.sendStatus(404);
 		}
-	} catch (e) {
-		res.sendStatus(404);
 	}
-	
-})
+);
 
 UsersRouter.get('/test/:testid', async (req, res) => {});
 export default UsersRouter;

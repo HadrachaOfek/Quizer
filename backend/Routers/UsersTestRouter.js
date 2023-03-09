@@ -9,7 +9,9 @@ import {
 	getExamineesList,
 	writeExaminee,
 } from '../serverGate.js';
+import pkg from 'crypto-js';
 
+const { SHA256 } = pkg;
 const UsersTestRouter = Router();
 const ID_PATTERN = new RegExp('[0-9]{7,9}');
 const PASSCODE_PATTERN = new RegExp('[A-Z\\d]{8}');
@@ -211,6 +213,7 @@ UsersTestRouter.get(
 								lastName: true,
 								userId: true,
 								_id: true,
+								grade: true,
 								endTime: true,
 							}
 						);
@@ -250,6 +253,57 @@ UsersTestRouter.get(
 		} catch (error) {
 			console.log(error);
 			res.json([false, 'server failed']);
+		}
+	}
+);
+
+UsersTestRouter.get(
+	'/inspect_tests/:userId/:userPassword/:testId',
+	async (req, res) => {
+		try {
+			const { userId, userPassword, testId } = req.params;
+			if (
+				await Users.exists({ userId: userId, password: userPassword })
+			) {
+				if (
+					await Test.exists({
+						$or: [
+							{ _id: testId, owner: userId },
+							{ _id: testId, coOwner: userId },
+						],
+					})
+				) {
+					const examineesToRespond = await UsersTest.find({
+						linkedTest: testId,
+						endTime: { $lt: Date.now() },
+					});
+					const questions = new Map();
+					for (const examinee of examineesToRespond) {
+						for (const { linkedQuestion } of examinee.questions) {
+							if (!questions.has(linkedQuestion)) {
+								questions.set(
+									linkedQuestion,
+									await Question.findById(linkedQuestion)
+								);
+							}
+						}
+					}
+					res.json([
+						true,
+						await UsersTest.find({
+							linkedTest: testId,
+							endTime: { $lt: Date.now() },
+						}),
+						[...questions.values()],
+					]);
+				} else {
+					res.json([false, 'user dont have premissions']);
+				}
+			} else {
+				res.json([false, 'user not exists']);
+			}
+		} catch (error) {
+			res.json([false, 'Server Error']);
 		}
 	}
 );
@@ -379,9 +433,48 @@ UsersTestRouter.patch('/end_test/:userTestId', async (req, res) => {
 				{ _id: userTestId },
 				{ endTime: Date.now() }
 			);
+			const toCheck = await UsersTest.findById(userTestId);
+			var grade = 0;
+			for (const { linkedQuestion, answers } of toCheck.questions) {
+				const question = await Question.findById(linkedQuestion, {
+					correctAnswers: true,
+					totalGrade: true,
+					type: true,
+					answers: true,
+				});
+				if (answers.length !== 0) {
+					if (question.type === 'שאלה פתוחה') {
+						grade += answers[0].trim() ? question.totalGrade : 0;
+					} else if (question.type === 'חד בחירה') {
+						grade +=
+							SHA256(answers[0]).toString() ===
+							question.correctAnswers[0]
+								? question.totalGrade
+								: 0;
+					} else if (question.type === 'רב בחירה') {
+						let correctAnsPrice =
+							question.totalGrade /
+							question.correctAnswers.length;
+						for (const ans of answers) {
+							grade +=
+								question.correctAnswers.indexOf(
+									SHA256(ans).toString()
+								) !== -1
+									? correctAnsPrice
+									: -(
+											question.totalGrade /
+											question.answers.length
+									  );
+						}
+					}
+				}
+				console.log(linkedQuestion, answers, grade);
+			}
+			await UsersTest.findByIdAndUpdate(userTestId, { grade: grade });
 			res.json([true, 'the test end']);
 		} else res.json([false, 'test close or not exist']);
 	} catch (error) {
+		console.log(error);
 		res.json([false, 'server error']);
 	}
 });

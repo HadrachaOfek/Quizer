@@ -95,6 +95,7 @@ TestRouter.patch(
 				passingGrade,
 				numOfQuestions,
 			} = req.body;
+			console.log(coOwner);
 			//Cheking if the user is exists
 			if (
 				await Users.exists({ userId: userId, password: userPassword })
@@ -409,11 +410,16 @@ TestRouter.get(
 					_id: testId,
 					$or: [{ coOwner: ownerId }, { owner: ownerId }],
 				});
-				const groupsCount = []
+				const groupsCount = [];
 				for (const group of tests.groups) {
-					groupsCount.push(await UsersTest.countDocuments({ linkedTest: testId, group: group }));
+					groupsCount.push(
+						await UsersTest.countDocuments({
+							linkedTest: testId,
+							group: group,
+						})
+					);
 				}
-				res.json([true, tests,groupsCount]);
+				res.json([true, tests, groupsCount]);
 			} else res.json([false, 'User not exists']);
 		} catch (e) {
 			res.json([false, 'Server Error']);

@@ -1,13 +1,11 @@
-import logo from './logo.svg';
 import { deepmerge } from '@mui/utils';
 import './App.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import React, { createContext, useEffect, useState } from 'react';
-import { createTheme, makeStyles, recomposeColor } from '@mui/material/styles';
+import React, { createContext, useState } from 'react';
+import { createTheme } from '@mui/material/styles';
 import {
 	Alert,
 	Backdrop,
-	CircularProgress,
 	Modal,
 	responsiveFontSizes,
 	Snackbar,
@@ -26,12 +24,10 @@ import purpleLoadingSymbol from './assets/purple_gif.gif';
 import blueLoadingSymbol from './assets/gif_transperentBg.gif';
 import InstructionsPage from './pages/InstructionsPage';
 import ExamPage from './pages/ExamPage';
+import InspectTestPage from './pages/InspectTestPage';
 export const SnackbarContext = createContext(null);
 
 function App() {
-	const userId = sessionStorage.getItem('userId');
-	const password = sessionStorage.getItem('password');
-	const isValid = userId !== null && password != null;
 	const [isSnackOpen, setIsSnackOpen] = useState(false);
 	const [backdropSymbol, setBackdropSymbol] = useState(purpleLoadingSymbol);
 	const [SnackMessege, setSnackMessege] = useState('');
@@ -50,7 +46,12 @@ function App() {
 	};
 
 	const [isBackdrop, setIsBackdrop] = useState(false);
-	const openBackdrop = (variant = 'purple') => { setBackdropSymbol(variant === 'purple' ? purpleLoadingSymbol : blueLoadingSymbol); setIsBackdrop(true) };
+	const openBackdrop = (variant = 'purple') => {
+		setBackdropSymbol(
+			variant === 'purple' ? purpleLoadingSymbol : blueLoadingSymbol
+		);
+		setIsBackdrop(true);
+	};
 	const closeBackdrop = () => setIsBackdrop(false);
 	const closeModal = () => setIsModalOpen(false);
 
@@ -128,6 +129,10 @@ function App() {
 								<Route
 									path='/accounts/edit_test/:userId/:password'
 									element={<EditTest />}
+								/>
+								<Route
+									path='/accounts/inspect/:userId/:password/:testId'
+									element={<InspectTestPage />}
 								/>
 							</Routes>
 						</ThemeProvider>
