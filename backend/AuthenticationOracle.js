@@ -105,11 +105,11 @@ class AuthenticationOracle{
             str += delimiter;
         }
         str += "\t\t";
-        for (let i = 0; i < 7; i++){
+        for (let i = 0; i < 12; i++){
             str += delimiter;
         }
         str += "id";
-        for (let i = 0; i < 7; i++){
+        for (let i = 0; i < 12; i++){
             str += delimiter;
         }
         str += "\n";
