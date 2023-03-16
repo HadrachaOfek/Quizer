@@ -1,14 +1,14 @@
 {
-  "name": "backend",
+  "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "serverGate.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start" : "nodemon app.js"
+    "start": "nodemon serverGate.js"
   },
-  "author": "",
+  "author": "oded vaalany",
   "license": "ISC",
   "dependencies": {
     "babel-cli": "^6.26.0",
