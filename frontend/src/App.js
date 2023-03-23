@@ -10,6 +10,7 @@ import {
 	responsiveFontSizes,
 	Snackbar,
 } from '@mui/material';
+import ll from "./assets/blue-sky-with-clouds-background-elegant_1017-26302.avif"
 
 import { ThemeProvider } from '@emotion/react';
 import '@fontsource/assistant';
@@ -67,7 +68,7 @@ function App() {
 				</Snackbar>
 				<Backdrop
 					open={isBackdrop}
-					sx={{ zIndex: 100, background: 'rgba(255,255,255,0.4)' }}>
+					sx={{ zIndex: 100, background : "rgba(0,0,0,0.6)" }}>
 					<img src={backdropSymbol} width='30%' />
 				</Backdrop>
 				<SnackbarContext.Provider

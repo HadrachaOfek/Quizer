@@ -66,7 +66,6 @@ function QuestionEdit({ submitQuestion, data, testId, deleteQuestion }) {
   const [answers, setAnswers] = useState(data ? data.answers : []);
   const [question, setQuestion] = useState(data ? data.question : "");
   const [file, setFile] = useState(data ? data.img : null);
-  const [grade, setGrade] = useState(data ? data.totalGrade : 0);
   const [active, setActive] = useState(data ? data.active : false);
   const [isValid, setIsValid] = useState(false);
   const filePicker = document.createElement("input");
@@ -126,13 +125,11 @@ function QuestionEdit({ submitQuestion, data, testId, deleteQuestion }) {
     (_) => {
       let temp =
         question.trim() !== "" &&
-        (selectedType === "שאלה פתוחה" || correctAnswer.length !== 0) &&
-        grade > 0 &&
-        grade < 101;
+        (selectedType === "שאלה פתוחה" || correctAnswer.length !== 0);
       answers.forEach((e) => (temp = temp & (e.trim() !== "")));
       setIsValid(temp);
     },
-    [refresh, question, selectedType, grade, correctAnswer]
+    [refresh, question, selectedType, correctAnswer]
   );
 
   const saveQuestion = () => {
@@ -142,7 +139,7 @@ function QuestionEdit({ submitQuestion, data, testId, deleteQuestion }) {
       img: file,
       active: active,
       question: question,
-      totalGrade: grade,
+      totalGrade: 0,
       answers: answers,
       correctAnswers: correctAnswer.map((element) =>
         SHA256(answers[element]).toString()
@@ -153,7 +150,6 @@ function QuestionEdit({ submitQuestion, data, testId, deleteQuestion }) {
       setQuestion("");
       setAnswers([]);
       setCorrectAnswer([]);
-      grade(0);
     }
   };
 
@@ -272,13 +268,6 @@ function QuestionEdit({ submitQuestion, data, testId, deleteQuestion }) {
         <Tooltip title="הפעל שאלה">
           <Switch checked={active} onClick={(e) => setActive(!active)} />
         </Tooltip>
-        <TextField
-          value={grade}
-          label="ציון"
-          size="small"
-          onChange={(e) => setGrade(e.target.valueAsNumber)}
-          type="number"
-        />
       </Stack>
     </Stack>
   );

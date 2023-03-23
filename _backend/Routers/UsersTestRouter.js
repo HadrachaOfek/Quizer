@@ -435,6 +435,7 @@ UsersTestRouter.patch('/end_test/:userTestId', async (req, res) => {
 			);
 			const toCheck = await UsersTest.findById(userTestId);
 			var grade = 0;
+			var questionGrade = 100/toCheck.questions.length
 			for (const { linkedQuestion, answers } of toCheck.questions) {
 				const question = await Question.findById(linkedQuestion, {
 					correctAnswers: true,
@@ -444,16 +445,16 @@ UsersTestRouter.patch('/end_test/:userTestId', async (req, res) => {
 				});
 				if (answers.length !== 0) {
 					if (question.type === 'שאלה פתוחה') {
-						grade += answers[0].trim() ? question.totalGrade : 0;
+						grade += answers[0].trim() ? questionGrade : 0;
 					} else if (question.type === 'חד בחירה') {
 						grade +=
 							SHA256(answers[0]).toString() ===
 							question.correctAnswers[0]
-								? question.totalGrade
+								? questionGrade
 								: 0;
 					} else if (question.type === 'רב בחירה') {
 						let correctAnsPrice =
-							question.totalGrade /
+						questionGrade /
 							question.correctAnswers.length;
 						for (const ans of answers) {
 							grade +=
@@ -468,9 +469,8 @@ UsersTestRouter.patch('/end_test/:userTestId', async (req, res) => {
 						}
 					}
 				}
-				console.log(linkedQuestion, answers, grade);
 			}
-			await UsersTest.findByIdAndUpdate(userTestId, { grade: grade });
+			await UsersTest.findByIdAndUpdate(userTestId, { grade: Math.round(grade) });
 			res.json([true, 'the test end']);
 		} else res.json([false, 'test close or not exist']);
 	} catch (error) {

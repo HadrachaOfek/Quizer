@@ -1,4 +1,7 @@
 import CheckBox from "@mui/icons-material/CheckBox";
+import DoneIcon from "@mui/icons-material/Done";
+import { SHA256 } from "crypto-js";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
   Button,
@@ -10,6 +13,7 @@ import {
   Divider,
   FormControlLabel,
   FormGroup,
+  InputAdornment,
   Paper,
   Radio,
   RadioGroup,
@@ -35,6 +39,7 @@ function QuestionCard({
   onDemark = () => undefined,
   answers,
   type,
+  correctAns = [],
 }) {
   const [isMarked, setIsMarked] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState(selected || []);
@@ -95,28 +100,37 @@ function QuestionCard({
         {type !== "שאלה פתוחה" && (
           <FormGroup>
             {answers.map((e, index) => (
-              <FormControlLabel
+              <Box
                 key={index}
-                disabled={readOnly}
-                onClick={(_) => handleSelection(e)}
-                value={e}
-                checked={selectedAnswers.indexOf(e) !== -1}
-                control={
-                  type === "חד בחירה" ? (
-                    <Radio readOnly={readOnly} />
-                  ) : (
-                    <Checkbox readOnly={readOnly} />
-                  )
-                }
-                label={e}
-              />
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  background:
+                    selectedAnswers.indexOf(e) !== -1
+                      ? correctAns.indexOf(SHA256(e).toString()) !== -1
+                        ? "#e6ffe6"
+                        : "#ffebe6"
+                      : "",
+                }}
+              >
+                <FormControlLabel
+                  onClick={(_) => !readOnly && handleSelection(e)}
+                  value={e}
+                  checked={selectedAnswers.indexOf(e) !== -1}
+                  control={type === "חד בחירה" ? <Radio /> : <Checkbox />}
+                  label={e}
+                />
+              </Box>
             ))}
           </FormGroup>
         )}
         {type === "שאלה פתוחה" ? (
           <TextField
+            InputProps={{ readOnly: readOnly }}
             fullWidth
-            disabled={readOnly}
+            variant="outlined"
+            size="medium"
+            sx={{ background: "#e6ffe6" }}
             multiline={true}
             value={textFieldValue}
             onBlur={(e) => handleSelection(e.target.value)}

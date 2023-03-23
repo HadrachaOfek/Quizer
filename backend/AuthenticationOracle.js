@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const KEY_SIZE = 20;
 class AuthenticationOracle{
     
@@ -5,6 +7,7 @@ class AuthenticationOracle{
     constructor() {
         this.connectedUsersKeysToId = new Map();
         this.connectedUsersIdsToKeys = new Map();
+        this.connectedUsersKeysToData = new Map();
     }
 
     /**
@@ -47,17 +50,28 @@ class AuthenticationOracle{
 
     /**
      * add the _id into the list and generate a uniqe key
-     * @param {string} _id the user _id from the db
+     * @param {String} _id the user _id from the db
      * @returns return uniqe key for the user if the user not in the system
      */
-    setConnection(_id) {
+    setConnection(_id, data = {}) {
+        _id = _id.toString();
         if (!this.connectedUsersIdsToKeys.has(_id)) {
             const key = this.keyGen();
             this.connectedUsersKeysToId.set(key, _id);
             this.connectedUsersIdsToKeys.set(_id, key);
+            this.connectedUsersKeysToData.set(key, data);
             return key;
         }
         return this.connectedUsersIdsToKeys.get(_id);
+    }
+
+    /**
+     * Return the user data if the user connect and the key found
+     * @param {string} key the key that the oracle provide
+     * @returns return the user data that write in the data base
+     */
+    getData(key) {
+        return this.connectedUsersKeysToData.get(key);
     }
 
     /**
@@ -65,7 +79,7 @@ class AuthenticationOracle{
      * @param {string} key the key that the oracle provide
      * @returns return the user id that write in the data base
      */
-    getConnection(key) {
+    getId(key) {
         return this.connectedUsersKeysToId.get(key);
     }
 
@@ -74,8 +88,18 @@ class AuthenticationOracle{
      * @param {String} key the key that the oracle provide
      * @returns return true if the key found else return false
      */
-    isExist(key) {
+    isExistKey(key) {
         return this.connectedUsersKeysToId.has(key);
+    }
+
+    /**
+     * Check if the oracle provided thie given key
+     * @param {String} id the id of the user in the db
+     * @returns return true if the key found else return false
+     */
+    isExistUser(id) {
+        id = id.toString()
+        return this.connectedUsersIdsToKeys.has(id);
     }
 
     /**
